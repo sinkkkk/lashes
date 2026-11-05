@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dict, type Lang } from "@/lib/i18n";
+import { AddToCalendar } from "./AddToCalendar";
 import { ServiceImage } from "./ServiceImage";
 
 export type WizardService = {
@@ -10,6 +11,7 @@ export type WizardService = {
   name: string;
   description: string;
   duration: string;
+  durationMin: number;
   price: string;
   photo: string;
   nextFree: string | null;
@@ -20,7 +22,14 @@ type Step = "service" | "time" | "details" | "done";
 const ORDER: Step[] = ["service", "time", "details", "done"];
 const TZ = "Europe/Tallinn";
 
-export function BookingWizard(props: { lang: Lang; services: WizardService[]; terms: string; initialServiceId: string | null }) {
+export function BookingWizard(props: {
+  lang: Lang;
+  services: WizardService[];
+  terms: string;
+  initialServiceId: string | null;
+  businessName: string;
+  address: string;
+}) {
   const { lang, services, terms } = props;
   const t = dict[lang];
   const locale = lang === "et" ? "et-EE" : "en-GB";
@@ -343,9 +352,17 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
             </p>
             <p className="mt-1 font-semibold">{service.price}</p>
           </div>
-          <a href={`/api/bookings/${token}/ics`} className="mt-6 block rounded-full bg-ink py-4 text-lg font-semibold text-white">
-            📅 {t.addToCalendar}
-          </a>
+          <AddToCalendar
+            token={token}
+            title={`${service.name} – ${props.businessName}`}
+            start={slot.iso}
+            end={new Date(new Date(slot.iso).getTime() + service.durationMin * 60_000).toISOString()}
+            details={`${window.location.origin}/${lang}/booking/${token}`}
+            location={props.address}
+            label={t.addToCalendar}
+            googleLabel={t.addToGoogle}
+            otherLabel={t.addToOtherCalendar}
+          />
           <Link href={`/${lang}/booking/${token}`} className="mt-4 block text-sm font-semibold text-muted underline underline-offset-2">
             {t.manageBooking}
           </Link>

@@ -3,6 +3,7 @@ import { BookingWizard, type WizardService } from "@/components/BookingWizard";
 import { getSlots } from "@/lib/booking";
 import { getServices, getSettings } from "@/lib/db";
 import { dict, isLang, type Lang } from "@/lib/i18n";
+import { site } from "@/lib/site";
 import { fmt, formatDuration, formatPrice } from "@/lib/time";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/book">): Promise<Metadata> {
@@ -22,6 +23,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/[la
     name: lang === "et" ? s.name_et : s.name_en,
     description: lang === "et" ? s.description_et : s.description_en,
     duration: formatDuration(s.duration_min, lang),
+    durationMin: s.duration_min,
     price: formatPrice(s.price_eur),
     photo: s.photo_url,
     nextFree: nextFree[i] ? fmt(nextFree[i], lang === "et" ? "EEEEEE d. MMM HH:mm" : "EEE d MMM HH:mm", lang) : null,
@@ -32,6 +34,8 @@ export default async function BookPage({ params, searchParams }: PageProps<"/[la
       lang={lang}
       services={list}
       terms={lang === "et" ? settings.terms_et : settings.terms_en}
+      businessName={site.name}
+      address={site.address}
       initialServiceId={typeof service === "string" && list.some((s) => s.id === service) ? service : null}
     />
   );

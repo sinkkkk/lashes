@@ -4,6 +4,7 @@ import { getBookingByToken } from "@/lib/booking";
 import { dict, isLang, type Lang } from "@/lib/i18n";
 import { site } from "@/lib/site";
 import { fmt, formatPrice } from "@/lib/time";
+import { AddToCalendar } from "@/components/AddToCalendar";
 import { CancelButton } from "./CancelButton";
 
 export const metadata = { robots: { index: false } };
@@ -40,9 +41,17 @@ export default async function BookingPage({ params }: PageProps<"/[lang]/booking
         <p className="mt-6 text-center text-muted">{t.pastBooking}</p>
       ) : (
         <>
-          <a href={`/api/bookings/${token}/ics`} className="mt-6 block rounded-full bg-ink py-4 text-center font-semibold text-white">
-            📅 {t.addToCalendar}
-          </a>
+          <AddToCalendar
+            token={token}
+            title={`${lang === "et" ? b.name_et : b.name_en} – ${site.name}`}
+            start={new Date(b.starts_at).toISOString()}
+            end={new Date(b.ends_at).toISOString()}
+            details={`${site.url}/${lang}/booking/${token}`}
+            location={site.address}
+            label={t.addToCalendar}
+            googleLabel={t.addToGoogle}
+            otherLabel={t.addToOtherCalendar}
+          />
           <CancelButton token={token} label={t.cancelBooking} confirmText={t.cancelConfirm} />
         </>
       )}

@@ -40,6 +40,8 @@ const et = {
   doneTitle: "Aeg on broneeritud!",
   doneText: "Saatsime kinnituse sinu e-postile.",
   addToCalendar: "Lisa kalendrisse",
+  addToGoogle: "või lisa Google'i kalendrisse",
+  addToOtherCalendar: "või lisa teise kalendrisse (.ics)",
   manageBooking: "Vaata või tühista broneering",
   // booking page
   yourBooking: "Sinu broneering",
@@ -95,6 +97,8 @@ const en: Dict = {
   doneTitle: "You're booked!",
   doneText: "We sent a confirmation to your email.",
   addToCalendar: "Add to calendar",
+  addToGoogle: "or add to Google Calendar",
+  addToOtherCalendar: "or add to another calendar (.ics)",
   manageBooking: "View or cancel booking",
   yourBooking: "Your booking",
   cancelBooking: "Cancel booking",
