@@ -20,6 +20,8 @@ export async function sendEmail(msg: { to: string; subject: string; html: string
       to: [msg.to],
       subject: msg.subject,
       html: msg.html,
+      // When a customer answers the confirmation email, the reply goes to the owner.
+      ...(process.env.OWNER_EMAIL && msg.to !== process.env.OWNER_EMAIL ? { reply_to: process.env.OWNER_EMAIL } : {}),
       attachments: msg.attachments?.map((a) => ({
         filename: a.filename,
         content: Buffer.from(a.content).toString("base64"),
