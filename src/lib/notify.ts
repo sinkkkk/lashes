@@ -3,6 +3,7 @@ import { sendEmail } from "./email";
 import { createCalendarEvent, deleteCalendarEvent } from "./gcal";
 import { makeIcs } from "./ics";
 import { site } from "./site";
+import { sendPush } from "./push";
 import { sendSms } from "./sms";
 import { fmt, formatPrice } from "./time";
 
@@ -77,6 +78,12 @@ export async function onBookingCreated(b: Booking, s: Service) {
         : `${site.name}: booked for ${when(b)}. Cancel: ${manageUrl(b)}`,
     ),
     sendSms(site.phone, `Uus broneering: ${ownerText}`),
+    sendPush({
+      title: `💅 Uus broneering: ${b.customer_name}`,
+      message: `${s.name_et}\n${fmt(b.starts_at, "EEEE d. MMMM HH:mm")}–${fmt(b.ends_at, "HH:mm")} · ${formatPrice(s.price_eur)}\nTel: ${b.phone}${b.note ? `\n📝 ${b.note}` : ""}`,
+      tags: ["calendar"],
+      click: `${site.url}/admin/bookings`,
+    }),
     createCalendarEvent({
       start: new Date(b.starts_at),
       end: new Date(b.ends_at),
@@ -91,6 +98,13 @@ export async function onBookingCreated(b: Booking, s: Service) {
 export async function onBookingCancelled(b: Booking, s: Pick<Service, "name_et" | "name_en">, by: "customer" | "owner") {
   const jobs: Promise<unknown>[] = [deleteCalendarEvent(b.gcal_event_id)];
   if (by === "customer") {
+    jobs.push(
+      sendPush({
+        title: `❌ Tühistatud: ${b.customer_name}`,
+        message: `${s.name_et}\n${fmt(b.starts_at, "EEEE d. MMMM HH:mm")}\nAeg on jälle vaba.`,
+        click: `${site.url}/admin`,
+      }),
+    );
     jobs.push(
       sendEmail({
         to: site.ownerEmail,

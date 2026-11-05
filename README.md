@@ -71,7 +71,16 @@ so the new-booking email is your instant alert.
 Web application** with redirect URI `https://YOUR-DOMAIN/api/google/callback`. Add
 `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel, redeploy, then connect it in `/admin` → **Seaded**.
 
-### 5. SMS (phase 2, optional)
+### 5. Instant phone notifications (free)
+1. Install **ntfy** on your phone (App Store / Google Play).
+2. Tap **+**, enter a secret topic name such as `hilleliis-a1b2c3d4e5f6` (hard to guess: anyone who
+   knows it can read the notifications), and subscribe.
+3. In Vercel add `NTFY_TOPIC` with the same name, then **Redeploy**.
+4. `/admin` → **Seaded** → **Telefoni teavitused** → **Saada testteade**.
+
+You then get a push for every new booking and customer cancellation; tapping it opens the admin.
+
+### 6. SMS (phase 2, optional)
 Create an account at [messente.com](https://messente.com), add `MESSENTE_USER`,
 `MESSENTE_PASSWORD` and (for your own alerts) `NEXT_PUBLIC_PHONE`. SMS switches on
 automatically: customers get a booking SMS and a reminder, and you get an SMS for each booking.

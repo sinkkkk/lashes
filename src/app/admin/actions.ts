@@ -192,3 +192,14 @@ export async function deleteBookingAction(id: string) {
   }
   revalidatePath("/admin", "layout");
 }
+
+export async function sendTestPushAction(): Promise<boolean> {
+  await requireAdmin();
+  const { sendPush } = await import("@/lib/push");
+  return sendPush({
+    title: "💅 Testteade",
+    message: "Kõik töötab! Nii näeb välja teade, kui keegi aja broneerib.",
+    tags: ["white_check_mark"],
+    click: `${(await import("@/lib/site")).site.url}/admin`,
+  });
+}

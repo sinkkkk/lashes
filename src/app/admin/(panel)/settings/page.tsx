@@ -3,10 +3,12 @@ import { feedUrls } from "@/lib/calendarFeed";
 import { dict } from "@/lib/i18n";
 import { getSettings } from "@/lib/db";
 import { googleConfigured } from "@/lib/gcal";
+import { pushEnabled } from "@/lib/push";
 import { ACCENT_PRESETS, DEFAULT_BG, getTheme } from "@/lib/theme";
 import { disconnectGoogleAction } from "../../actions";
 import { AppearanceForm } from "./AppearanceForm";
 import { CopyLink } from "./CopyLink";
+import { PushTest } from "./PushTest";
 import { SettingsForm } from "./SettingsForm";
 
 export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
@@ -51,6 +53,23 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
           <CopyLink url={feed.https} />
         </div>
         <p className="mt-2 text-xs text-muted">Link sobib ka Google&apos;i ja Outlooki kalendrisse. Ära jaga seda teistega: see näitab klientide andmeid.</p>
+      </section>
+
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-line">
+        <h2 className="font-semibold">Telefoni teavitused</h2>
+        <p className="mt-1 text-sm text-muted">
+          Iga uue broneeringu ja tühistamise kohta tuleb kohe teade telefoni (rakendus <b>ntfy</b>).
+        </p>
+        {pushEnabled() ? (
+          <>
+            <p className="mt-3 text-sm font-semibold text-emerald-700">● Sisse lülitatud</p>
+            <PushTest />
+          </>
+        ) : (
+          <p className="mt-3 text-sm text-muted">
+            Välja lülitatud. Lisa Vercelis seade <code>NTFY_TOPIC</code> ja tee Redeploy (vt README).
+          </p>
+        )}
       </section>
 
       {googleConfigured() && (
