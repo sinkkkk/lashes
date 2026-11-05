@@ -120,7 +120,7 @@ export function AdminCalendar() {
     <div>
       <p className="mb-3 text-sm text-muted">
         {isMobile ? "Hoia sõrme tühjal kohal ja lohista" : "Lohista tühjal alal"}, et lisada <b className="text-emerald-700">vaba aega</b>. Lohista
-        servast pikkuse muutmiseks, puuduta kustutamiseks. <b className="text-rose">Roosad</b> on broneeringud.
+        servast pikkuse muutmiseks, puuduta kustutamiseks. <b className="text-accent">Roosad</b> on broneeringud.
       </p>
       <div className="rounded-2xl bg-white p-2 ring-1 ring-line md:p-4">
         <FullCalendar
@@ -195,7 +195,7 @@ export function AdminCalendar() {
                   flash("Broneering tühistatud");
                 });
               }}
-              className="mt-5 w-full rounded-full py-3 font-semibold text-rose ring-1 ring-rose/40"
+              className="mt-5 w-full rounded-full py-3 font-semibold text-accent ring-1 ring-accent/40"
             >
               Tühista broneering
             </button>

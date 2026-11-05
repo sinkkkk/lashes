@@ -17,7 +17,7 @@ export function ReviewForm({ token, lang, defaultName }: { token: string; lang: 
         <div className="flex justify-between">
           {[1, 2, 3, 4, 5].map((i) => (
             <button key={i} type="button" onClick={() => setRating(i)} className="p-1" aria-label={`${i}/5`}>
-              <svg viewBox="0 0 20 20" className={`h-12 w-12 ${i <= rating ? "text-rose" : "text-line"}`} fill="currentColor">
+              <svg viewBox="0 0 20 20" className={`h-12 w-12 ${i <= rating ? "text-accent" : "text-line"}`} fill="currentColor">
                 <path d="M10 1.8l2.5 5.2 5.7.8-4.1 4 1 5.7L10 14.8l-5.1 2.7 1-5.7-4.1-4 5.7-.8z" />
               </svg>
             </button>
@@ -33,7 +33,7 @@ export function ReviewForm({ token, lang, defaultName }: { token: string; lang: 
         <span className="mb-1.5 block text-sm font-medium text-muted">{t.displayName}</span>
         <input name="name" defaultValue={defaultName} maxLength={40} className="input" />
       </label>
-      {state && "error" in state && <p className="text-sm text-rose">{t.error}</p>}
+      {state && "error" in state && <p className="text-sm text-accent">{t.error}</p>}
       <button disabled={!rating || pending} className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-white disabled:bg-line disabled:text-muted">
         {pending ? t.sending : t.sendReview}
       </button>

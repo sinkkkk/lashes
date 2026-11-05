@@ -31,7 +31,7 @@ export default async function BookingPage({ params }: PageProps<"/[lang]/booking
 
       {cancelled ? (
         <>
-          <p className="mt-6 text-center font-semibold text-rose">{t.cancelled}</p>
+          <p className="mt-6 text-center font-semibold text-accent">{t.cancelled}</p>
           <Link href={`/${lang}/book`} className="mt-4 block rounded-full bg-ink py-4 text-center font-semibold text-white">
             {t.bookAgain}
           </Link>

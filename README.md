@@ -79,10 +79,20 @@ automatically: customers get a booking SMS and a reminder, and you get an SMS fo
 ### Photos
 - Service photos: in `/admin` → Teenused, paste an image link (for example, upload the photo
   to Supabase → Storage → a public bucket, and copy its URL). Square photos look best.
-- Home page photo: put `hero.jpg` in the `public` folder and set `NEXT_PUBLIC_HERO_IMAGE=/hero.jpg`.
+- Home page background: `/admin` → **Seaded** → **Välimus** → **Vaheta taustapilt** (see below).
 
-### Colours
-Change the brand colours at the top of [`src/app/globals.css`](src/app/globals.css).
+### Change the look (no code)
+`/admin` → **Seaded** → **Välimus**:
+- **Põhivärv** (accent colour): pick a preset or any colour. Buttons, links, stars, prices and the
+  admin calendar all follow it; lighter shades are mixed from it automatically.
+- **Vaheta taustapilt**: upload a new landing-page background from your phone (it is shrunk
+  automatically). **Taasta algne** brings back the original photo.
+- **Taustapildi tumedus**: darken the photo so the white text stays readable.
+
+One-time setup for this: in Supabase → **SQL Editor**, run [`db/migrations/002_appearance.sql`](db/migrations/002_appearance.sql).
+(New installs get it from `schema.sql` automatically.) Until then the site uses the built-in copper look.
+
+The built-in photo is `public/brand/background.webp`; the default colour is in `src/lib/theme.ts`.
 
 ---
 

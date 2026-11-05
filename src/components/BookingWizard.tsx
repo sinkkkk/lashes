@@ -171,7 +171,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
         </div>
       )}
 
-      {error && <p className="mb-4 rounded-xl bg-rose/10 p-3 text-sm text-rose" role="alert">{error}</p>}
+      {error && <p className="mb-4 rounded-xl bg-accent/10 p-3 text-sm text-accent" role="alert">{error}</p>}
 
       {/* 1. Service */}
       {step === "service" && (
@@ -217,7 +217,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
               <span className="block font-semibold">{service.name}</span>
               <span className="text-sm text-muted">{service.duration} · {service.price}</span>
             </span>
-            <span className="text-sm font-semibold text-rose">{lang === "et" ? "Muuda" : "Change"}</span>
+            <span className="text-sm font-semibold text-accent">{lang === "et" ? "Muuda" : "Change"}</span>
           </button>
 
           {slots === null ? (
@@ -314,7 +314,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
             <input type="checkbox" required checked={accepted} onChange={(e) => setAccepted(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-ink" />
             <span className="text-[15px]">
               {t.acceptTerms1}
-              <button type="button" onClick={() => setShowTerms(true)} className="font-semibold text-rose underline underline-offset-2">
+              <button type="button" onClick={() => setShowTerms(true)} className="font-semibold text-accent underline underline-offset-2">
                 {t.acceptTerms2}
               </button>
             </span>

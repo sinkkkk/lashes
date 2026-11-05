@@ -60,12 +60,12 @@ export default async function BookingsPage({ searchParams }: PageProps<"/admin/b
                     <div>
                       <p className="font-semibold">
                         {fmt(b.starts_at, "HH:mm")}–{fmt(b.ends_at, "HH:mm")} · {b.customer_name}
-                        {b.status === "cancelled" && <span className="ml-2 text-xs text-rose">tühistatud</span>}
+                        {b.status === "cancelled" && <span className="ml-2 text-xs text-accent">tühistatud</span>}
                       </p>
                       <p className="text-sm text-muted">{b.service} · {Number(b.price_eur)} €</p>
                       {b.note && <p className="mt-1 text-sm">📝 {b.note}</p>}
                       <p className="mt-1 text-sm">
-                        <a href={`tel:${b.phone}`} className="font-medium text-rose">{b.phone}</a>
+                        <a href={`tel:${b.phone}`} className="font-medium text-accent">{b.phone}</a>
                         <span className="text-muted"> · </span>
                         <a href={`mailto:${b.email}`} className="text-muted underline">{b.email}</a>
                       </p>

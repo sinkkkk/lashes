@@ -101,3 +101,56 @@ export async function disconnectGoogleAction() {
   await db()`update settings set google_refresh_token = null where id = 1`;
   revalidatePath("/admin/settings");
 }
+
+// ---- Look (Välimus): accent colour, background photo, darkness ----------------
+
+type LookResult = { ok: true } | { ok: false; error: "migration" | "invalid" | "too_big" };
+
+const needsMigration = (e: unknown) => ["42703", "42P01"].includes((e as { code?: string }).code ?? "");
+
+export async function saveAppearanceAction(accent: string, darkness: number): Promise<LookResult> {
+  await requireAdmin();
+  if (!/^#[0-9a-f]{6}$/i.test(accent)) return { ok: false, error: "invalid" };
+  const d = Math.min(90, Math.max(0, Math.round(Number(darkness) || 0)));
+  try {
+    await db()`update settings set accent_color = ${accent.toLowerCase()}, bg_darkness = ${d} where id = 1`;
+  } catch (e) {
+    if (needsMigration(e)) return { ok: false, error: "migration" };
+    throw e;
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+export async function uploadBackgroundAction(form: FormData): Promise<LookResult> {
+  await requireAdmin();
+  const file = form.get("photo");
+  if (!(file instanceof File) || !IMAGE_TYPES.includes(file.type)) return { ok: false, error: "invalid" };
+  if (file.size > 3 * 1024 * 1024) return { ok: false, error: "too_big" };
+  const data = Buffer.from(await file.arrayBuffer());
+  try {
+    await db()`
+      insert into assets (key, content_type, data, updated_at)
+      values ('background', ${file.type}, ${data}, now())
+      on conflict (key) do update set content_type = excluded.content_type, data = excluded.data, updated_at = now()`;
+  } catch (e) {
+    if (needsMigration(e)) return { ok: false, error: "migration" };
+    throw e;
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function resetBackgroundAction(): Promise<LookResult> {
+  await requireAdmin();
+  try {
+    await db()`delete from assets where key = 'background'`;
+  } catch (e) {
+    if (needsMigration(e)) return { ok: true }; // nothing uploaded yet
+    throw e;
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

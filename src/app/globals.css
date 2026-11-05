@@ -1,12 +1,20 @@
 @import "tailwindcss";
 
-/* Brand colours: change these to restyle the whole site. */
+/* `on-dark:` styles apply only on a page that has a dark photo background (the landing page). */
+@custom-variant on-dark (&:where(body:has([data-dark-page]) *));
+
+/*
+ * Brand colours.
+ * The accent colour is chosen in /admin → Seaded → Välimus and arrives as --accent
+ * (see src/lib/theme.ts). Every lighter/darker shade below is mixed from it.
+ */
 @theme {
   --color-cream: #faf6f3;
   --color-sand: #f1e8e2;
-  --color-blush: #e9cfc5;
-  --color-rose: #b9776a;
-  --color-ink: #2b2523;
+  --color-accent: var(--accent, #a65a2e);
+  --color-accent-light: color-mix(in oklab, var(--accent, #a65a2e) 62%, white);
+  --color-blush: color-mix(in oklab, var(--accent, #a65a2e) 22%, white);
+  --color-ink: #24170f;
   --color-muted: #7d716c;
   --color-line: #e7ddd7;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -33,7 +41,7 @@ body {
 .fc {
   --fc-border-color: var(--color-line);
   --fc-today-bg-color: #fdf3ee;
-  --fc-now-indicator-color: var(--color-rose);
+  --fc-now-indicator-color: var(--color-accent);
   font-size: 13px;
 }
 .fc .fc-timegrid-slot {
@@ -64,7 +72,7 @@ body {
   color: #2f6b3c;
 }
 .fc .booking-block {
-  background: var(--color-rose);
+  background: var(--color-accent);
   border: none;
   font-weight: 600;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.15);

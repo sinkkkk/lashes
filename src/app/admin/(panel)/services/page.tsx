@@ -13,7 +13,7 @@ export default async function ServicesPage() {
           <summary className="flex cursor-pointer list-none items-center justify-between p-4">
             <span>
               <span className="font-semibold">{s.name_et}</span>
-              {!s.active && <span className="ml-2 text-xs text-rose">peidetud</span>}
+              {!s.active && <span className="ml-2 text-xs text-accent">peidetud</span>}
               <span className="block text-sm text-muted">
                 {s.duration_min} min · {s.price_eur} €
               </span>
@@ -23,13 +23,13 @@ export default async function ServicesPage() {
           <div className="border-t border-line p-4">
             <ServiceForm s={s} />
             <form action={deleteServiceAction.bind(null, s.id)} className="mt-3">
-              <button className="text-sm text-rose">Kustuta teenus</button>
+              <button className="text-sm text-accent">Kustuta teenus</button>
             </form>
           </div>
         </details>
       ))}
       <details className="rounded-2xl bg-white ring-1 ring-line" open={services.length === 0}>
-        <summary className="cursor-pointer list-none p-4 font-semibold text-rose">+ Lisa uus teenus</summary>
+        <summary className="cursor-pointer list-none p-4 font-semibold text-accent">+ Lisa uus teenus</summary>
         <div className="border-t border-line p-4">
           <ServiceForm />
         </div>

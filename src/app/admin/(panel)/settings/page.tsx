@@ -2,11 +2,13 @@ import { headers } from "next/headers";
 import { feedUrls } from "@/lib/calendarFeed";
 import { getSettings } from "@/lib/db";
 import { googleConfigured } from "@/lib/gcal";
+import { ACCENT_PRESETS, DEFAULT_BG, getTheme } from "@/lib/theme";
 import { disconnectGoogleAction, saveSettingsAction } from "../../actions";
+import { AppearanceForm } from "./AppearanceForm";
 import { CopyLink } from "./CopyLink";
 
 export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
-  const s = await getSettings();
+  const [s, theme] = await Promise.all([getSettings(), getTheme()]);
   const { google } = await searchParams;
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
@@ -14,6 +16,14 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
   const feed = feedUrls(host ? `${proto}://${host}` : undefined);
   return (
     <div className="max-w-2xl space-y-6">
+      <AppearanceForm
+        accent={theme.accent}
+        darkness={theme.bgDarkness}
+        bgUrl={theme.bgUrl}
+        isDefaultBg={theme.bgUrl === DEFAULT_BG}
+        presets={ACCENT_PRESETS}
+      />
+
       <section className="rounded-2xl bg-white p-5 ring-1 ring-line">
         <h2 className="font-semibold">Apple kalender</h2>
         <p className="mt-1 text-sm text-muted">
@@ -44,7 +54,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
         <h2 className="font-semibold">Google kalender</h2>
         <p className="mt-1 text-sm text-muted">Iga uus broneering lisatakse sinu Google kalendrisse ja telefon annab teada.</p>
         {google === "ok" && <p className="mt-2 text-sm text-emerald-700">Ühendatud!</p>}
-        {google === "error" && <p className="mt-2 text-sm text-rose">Ühendamine ebaõnnestus, proovi uuesti.</p>}
+        {google === "error" && <p className="mt-2 text-sm text-accent">Ühendamine ebaõnnestus, proovi uuesti.</p>}
         {s.google_refresh_token ? (
           <form action={disconnectGoogleAction} className="mt-3 flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-700">● Ühendatud</span>

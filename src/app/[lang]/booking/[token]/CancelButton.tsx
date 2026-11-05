@@ -8,7 +8,7 @@ export function CancelButton({ token, label, confirmText }: { token: string; lab
     <button
       disabled={pending}
       onClick={() => confirm(confirmText) && start(() => cancelBookingAction(token))}
-      className="mt-3 w-full rounded-full py-4 font-semibold text-rose ring-1 ring-rose/40 disabled:opacity-50"
+      className="mt-3 w-full rounded-full py-4 font-semibold text-accent ring-1 ring-accent/40 disabled:opacity-50"
     >
       {pending ? "…" : label}
     </button>
