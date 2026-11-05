@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { dayKey, fmt } from "@/lib/time";
 import { OwnerCancel } from "./OwnerCancel";
+import { OwnerDelete } from "./OwnerDelete";
 
 type Row = {
   id: string;
@@ -70,7 +71,10 @@ export default async function BookingsPage({ searchParams }: PageProps<"/admin/b
                         <a href={`mailto:${b.email}`} className="text-muted underline">{b.email}</a>
                       </p>
                     </div>
-                    {!past && b.status === "confirmed" && <OwnerCancel id={b.id} name={b.customer_name} />}
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      {!past && b.status === "confirmed" && <OwnerCancel id={b.id} name={b.customer_name} />}
+                      <OwnerDelete id={b.id} name={b.customer_name} />
+                    </div>
                   </div>
                 </li>
               ))}

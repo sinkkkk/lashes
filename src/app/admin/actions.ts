@@ -154,3 +154,17 @@ export async function resetBackgroundAction(): Promise<LookResult> {
   revalidatePath("/", "layout");
   return { ok: true };
 }
+
+/**
+ * Removes a booking for good (test or spam bookings). No emails are sent.
+ * Reviews linked to it are kept (they can be removed in Arvustused).
+ */
+export async function deleteBookingAction(id: string) {
+  await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+  const [b] = await db()`delete from bookings where id = ${id} returning gcal_event_id`;
+  if (b?.gcal_event_id) {
+    after(async () => (await import("@/lib/gcal")).deleteCalendarEvent(b.gcal_event_id as string));
+  }
+  revalidatePath("/admin", "layout");
+}

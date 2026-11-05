@@ -7,7 +7,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore, useTransition } from "react";
-import { cancelBookingByOwner } from "../actions";
+import { cancelBookingByOwner, deleteBookingAction } from "../actions";
 
 type BookingInfo = {
   id: string;
@@ -198,6 +198,21 @@ export function AdminCalendar() {
               className="mt-5 w-full rounded-full py-3 font-semibold text-accent ring-1 ring-accent/40"
             >
               Tühista broneering
+            </button>
+            <button
+              disabled={pending}
+              onClick={() => {
+                if (!confirm(`Kustutan ${open.customer_name} broneeringu jäädavalt? Klient teadet ei saa.`)) return;
+                startTransition(async () => {
+                  await deleteBookingAction(open.id);
+                  setOpen(null);
+                  refetch();
+                  flash("Broneering kustutatud");
+                });
+              }}
+              className="mt-3 w-full py-2 text-sm text-muted underline underline-offset-2"
+            >
+              Kustuta (test / spämm)
             </button>
           </div>
         </div>
