@@ -21,7 +21,7 @@ length fits inside your free time and doesn't overlap another booking (plus buff
 The database itself makes double bookings impossible, even if two people press
 "Confirm" at the same moment.
 
-Tech: Next.js 16, Tailwind, Postgres (Supabase), Resend email, Google Calendar API,
+Tech: Next.js 16, Tailwind, Postgres (Supabase), Resend email, Apple/iCal calendar feed (optional Google Calendar API),
 FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
 
 ---
@@ -32,7 +32,11 @@ FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
 1. Create an account at [supabase.com](https://supabase.com) → **New project** (region: Frankfurt / eu-central-1).
 2. Open **SQL Editor**, paste all of [`db/schema.sql`](db/schema.sql), press **Run**.
 3. Optional: paste [`db/seed.sql`](db/seed.sql) and run it for example services and terms (edit them later in `/admin`).
-4. **Project Settings → Database → Connection string → Transaction pooler**. Copy it; this is your `DATABASE_URL`.
+4. Click the green **Connect** button at the top → **Connection String** → set the method to
+   **Transaction pooler** (port 6543, host ends in `pooler.supabase.com`). Copy it and replace
+   `[YOUR-PASSWORD]` (including the brackets) with your database password. This is your `DATABASE_URL`.
+   Use a password with only letters and numbers, because symbols like `@ # /` break the address.
+   (Forgot it? **Project Settings → Database → Reset database password**.)
 
 ### 2. Email: Resend
 1. Create an account at [resend.com](https://resend.com) → **API Keys** → create one → `RESEND_API_KEY`.
@@ -49,18 +53,23 @@ FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
    `NEXT_PUBLIC_SITE_URL` to it.
 
 The daily job (reminders + review requests) is already set in `vercel.json` and runs at 16:00 UTC (18:00/19:00 in Tallinn).
+`vercel.json` also runs the site in Vercel's Dublin region, next to a Supabase database in Ireland (`eu-west-1`).
+If your database is somewhere else, change `regions` to the closest one (e.g. `fra1` for Frankfurt).
 
-### 4. Google Calendar (optional, recommended)
-1. [console.cloud.google.com](https://console.cloud.google.com) → create a project →
-   **APIs & Services → Library** → enable **Google Calendar API**.
-2. **OAuth consent screen** → External → fill in the app name and your email → add yourself as a
-   **test user**, then press **Publish app** (otherwise access expires after 7 days).
-3. **Credentials → Create credentials → OAuth client ID → Web application**.
-   Authorized redirect URI: `https://YOUR-DOMAIN/api/google/callback`.
-4. Put the client ID and secret into Vercel as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, then redeploy.
-5. In `/admin` → **Seaded** → **Ühenda Google kalender**.
+### 4. Apple Calendar (built in, nothing to set up)
+On your iPhone, open `/admin` → **Seaded** → **Lisa Apple kalendrisse** → **Subscribe**.
+All bookings appear in your calendar and update by themselves; cancelled ones disappear.
+On a Mac, set the calendar's **Auto-refresh** to every 5 minutes (right-click it → Get Info).
+The same link works in Google Calendar and Outlook too ("Add calendar from URL").
 
-From then on every booking appears in your Google Calendar, and your phone notifies you.
+The iPhone refreshes subscribed calendars on its own schedule (usually within 15 minutes to an hour),
+so the new-booking email is your instant alert.
+
+**Optional: direct Google Calendar sync.** If you use Google Calendar instead, set up an OAuth app:
+[console.cloud.google.com](https://console.cloud.google.com) → enable **Google Calendar API** →
+**OAuth consent screen** (External, add yourself, **Publish app**) → **Credentials → OAuth client ID →
+Web application** with redirect URI `https://YOUR-DOMAIN/api/google/callback`. Add
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel, redeploy, then connect it in `/admin` → **Seaded**.
 
 ### 5. SMS (phase 2, optional)
 Create an account at [messente.com](https://messente.com), add `MESSENTE_USER`,
@@ -95,6 +104,7 @@ Without `RESEND_API_KEY`, emails are only printed in the terminal, so you can te
 | Free-time calculation | `src/lib/slots.ts` (+ tests) |
 | Creating bookings | `src/lib/booking.ts`, `src/app/api/bookings/route.ts` |
 | Emails, SMS, Google sync | `src/lib/notify.ts` |
+| Calendar feed for Apple Calendar | `src/app/api/calendar/[token]/route.ts`, `src/lib/ics.ts` |
 | Customer booking flow | `src/components/BookingWizard.tsx` |
 | Texts (Estonian / English) | `src/lib/i18n.ts` |
 | Admin calendar | `src/app/admin/(panel)/AdminCalendar.tsx` |

@@ -1,4 +1,6 @@
-import postgres, { type Sql } from "postgres";
+import postgres from "postgres";
+
+type Sql = postgres.Sql;
 
 // One shared connection pool, also across hot reloads in development.
 const g = globalThis as unknown as { __sql?: Sql };

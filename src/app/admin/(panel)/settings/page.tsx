@@ -1,20 +1,51 @@
+import { headers } from "next/headers";
+import { feedUrls } from "@/lib/calendarFeed";
 import { getSettings } from "@/lib/db";
 import { googleConfigured } from "@/lib/gcal";
 import { disconnectGoogleAction, saveSettingsAction } from "../../actions";
+import { CopyLink } from "./CopyLink";
 
 export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
   const s = await getSettings();
   const { google } = await searchParams;
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const proto = h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
+  const feed = feedUrls(host ? `${proto}://${host}` : undefined);
   return (
     <div className="max-w-2xl space-y-6">
+      <section className="rounded-2xl bg-white p-5 ring-1 ring-line">
+        <h2 className="font-semibold">Apple kalender</h2>
+        <p className="mt-1 text-sm text-muted">
+          Kõik broneeringud ilmuvad sinu iPhone&apos;i ja Maci kalendrisse ning uuenevad ise. Tühistatud ajad kaovad ära.
+        </p>
+        <a href={feed.webcal} className="mt-4 block rounded-full bg-ink py-3.5 text-center font-semibold text-white">
+          Lisa Apple kalendrisse
+        </a>
+        <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm text-muted">
+          <li>Ava see leht oma iPhone&apos;is (või Macis) ja vajuta nuppu ülal.</li>
+          <li>Vajuta <b>Telli / Subscribe</b> ja siis <b>Lisa / Add</b>.</li>
+          <li>
+            Macis: Kalender → paremklõps kalendril &quot;broneeringud&quot; → <b>Get Info</b> → Auto-refresh: <b>Every 5 minutes</b>.
+          </li>
+        </ol>
+        <p className="mt-3 text-xs text-muted">
+          iPhone uuendab tellitud kalendrit iseseisvalt (tavaliselt 15 min – 1 h jooksul). Uuest broneeringust saad kohe teada e-kirjaga.
+        </p>
+        <div className="mt-4 flex items-center gap-2">
+          <input readOnly value={feed.https} className="input min-w-0 flex-1 truncate text-xs" aria-label="Kalendri link" />
+          <CopyLink url={feed.https} />
+        </div>
+        <p className="mt-2 text-xs text-muted">Link sobib ka Google&apos;i ja Outlooki kalendrisse. Ära jaga seda teistega: see näitab klientide andmeid.</p>
+      </section>
+
+      {googleConfigured() && (
       <section className="rounded-2xl bg-white p-5 ring-1 ring-line">
         <h2 className="font-semibold">Google kalender</h2>
         <p className="mt-1 text-sm text-muted">Iga uus broneering lisatakse sinu Google kalendrisse ja telefon annab teada.</p>
         {google === "ok" && <p className="mt-2 text-sm text-emerald-700">Ühendatud!</p>}
         {google === "error" && <p className="mt-2 text-sm text-rose">Ühendamine ebaõnnestus, proovi uuesti.</p>}
-        {!googleConfigured() ? (
-          <p className="mt-3 text-sm text-rose">GOOGLE_CLIENT_ID ja GOOGLE_CLIENT_SECRET on seadistamata (vt README).</p>
-        ) : s.google_refresh_token ? (
+        {s.google_refresh_token ? (
           <form action={disconnectGoogleAction} className="mt-3 flex items-center gap-3">
             <span className="text-sm font-semibold text-emerald-700">● Ühendatud</span>
             <button className="text-sm text-muted underline">Katkesta ühendus</button>
@@ -27,6 +58,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
           </a>
         )}
       </section>
+      )}
 
       <form action={saveSettingsAction} className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-line">
         <h2 className="font-semibold">Broneerimine</h2>
