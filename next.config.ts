@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
+// Every page here shows live data (free times, bookings), so pages render on
+// request instead of using Cache Components.
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  async redirects() {
+    return [{ source: "/", destination: "/et", permanent: false }];
+  },
   turbopack: {
     rules: {
       "*.css": {
