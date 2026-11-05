@@ -11,6 +11,18 @@ import { formatDuration, formatPrice } from "@/lib/time";
 // Dark status bar on iPhone, so it blends into the background photo.
 export const viewport: Viewport = { themeColor: "#140d08" };
 
+/**
+ * Darkening layer over the photo: a gentle, eased gradient (no visible bands) that is a bit
+ * lighter at the top, where the photo shows, and darker at the bottom, behind the cards.
+ */
+function overlay(darkness: number) {
+  const d = darkness / 100;
+  const stops: [number, number][] = [
+    [0, 0.55], [20, 0.62], [40, 0.76], [60, 0.9], [80, 1.02], [100, 1.12],
+  ];
+  return `linear-gradient(to bottom, ${stops.map(([pos, f]) => `rgb(0 0 0 / ${Math.min(0.95, d * f).toFixed(3)}) ${pos}%`).join(", ")})`;
+}
+
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang: l } = await params;
   const lang: Lang = isLang(l) ? l : "et";
@@ -23,23 +35,18 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   ]);
 
   return (
-    <div data-dark-page className="px-5 pb-32 text-white">
+    <div data-dark-page className="px-5 pb-40 text-white">
       {/* Background photo (chosen in /admin → Seaded → Välimus) with a darkening layer on top */}
       <div aria-hidden className="fixed inset-0 -z-10 bg-[#21140c]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={theme.bgUrl} alt="" fetchPriority="high" decoding="async" className="h-full w-full object-cover" />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(to bottom, rgb(0 0 0 / ${theme.bgDarkness * 0.6}%), rgb(0 0 0 / ${theme.bgDarkness}%) 45%, rgb(0 0 0 / ${Math.min(95, theme.bgDarkness + 20)}%))`,
-          }}
-        />
+        <div className="absolute inset-0" style={{ background: overlay(theme.bgDarkness) }} />
       </div>
 
       {/* Hero */}
       <section className="flex min-h-[46dvh] flex-col justify-end pt-10 pb-4">
         <h1 className="font-display text-[2.6rem] leading-[1.08] font-semibold text-[#fbf3ec] drop-shadow-[0_2px_12px_rgb(0_0_0/0.45)]">
-          {t.tagline}
+          {theme.tagline[lang] ?? t.tagline}
         </h1>
         {rating.count > 0 && (
           <Link href={`/${lang}/reviews`} className="mt-4 flex items-center gap-2 text-sm text-white/80">
@@ -91,13 +98,12 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       )}
 
       {/* Sticky call to action, always in thumb reach */}
-      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-md bg-gradient-to-t from-black/70 via-black/40 to-transparent px-5 pt-8 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-        <Link
-          href={`/${lang}/book`}
-          className="block rounded-full bg-accent-light py-4 text-center text-lg font-semibold text-ink shadow-lg shadow-black/30 active:scale-[.99]"
-        >
-          {t.bookNow}
-        </Link>
+      <div className="bottom-bar fade-dark">
+        <div className="mx-auto max-w-md px-5">
+          <Link href={`/${lang}/book`} className="cta bg-accent-light text-ink">
+            {t.bookNow}
+          </Link>
+        </div>
       </div>
     </div>
   );

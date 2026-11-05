@@ -99,3 +99,7 @@ create table if not exists assets (
   updated_at   timestamptz not null default now()
 );
 alter table assets enable row level security;
+
+-- Editable landing page text (same as db/migrations/003_tagline.sql)
+alter table settings add column if not exists tagline_et text;
+alter table settings add column if not exists tagline_en text;

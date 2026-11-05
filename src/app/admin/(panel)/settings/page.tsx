@@ -1,11 +1,13 @@
 import { headers } from "next/headers";
 import { feedUrls } from "@/lib/calendarFeed";
+import { dict } from "@/lib/i18n";
 import { getSettings } from "@/lib/db";
 import { googleConfigured } from "@/lib/gcal";
 import { ACCENT_PRESETS, DEFAULT_BG, getTheme } from "@/lib/theme";
-import { disconnectGoogleAction, saveSettingsAction } from "../../actions";
+import { disconnectGoogleAction } from "../../actions";
 import { AppearanceForm } from "./AppearanceForm";
 import { CopyLink } from "./CopyLink";
+import { SettingsForm } from "./SettingsForm";
 
 export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
   const [s, theme] = await Promise.all([getSettings(), getTheme()]);
@@ -22,6 +24,8 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
         bgUrl={theme.bgUrl}
         isDefaultBg={theme.bgUrl === DEFAULT_BG}
         presets={ACCENT_PRESETS}
+        tagline={theme.tagline}
+        defaultTagline={{ et: dict.et.tagline, en: dict.en.tagline }}
       />
 
       <section className="rounded-2xl bg-white p-5 ring-1 ring-line">
@@ -70,7 +74,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
       </section>
       )}
 
-      <form action={saveSettingsAction} className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-line">
+      <SettingsForm>
         <h2 className="font-semibold">Broneerimine</h2>
         <div className="grid grid-cols-3 gap-3">
           <label>
@@ -96,8 +100,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
           <span className="mb-1 block text-xs font-medium text-muted">Terms (English)</span>
           <textarea name="terms_en" rows={7} defaultValue={s.terms_en} className="input" />
         </label>
-        <button className="w-full rounded-full bg-ink py-3 font-semibold text-white">Salvesta</button>
-      </form>
+        </SettingsForm>
     </div>
   );
 }

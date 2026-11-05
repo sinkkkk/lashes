@@ -82,7 +82,49 @@ body {
 }
 
 @layer components {
+  /* Big thumb-friendly button pinned to the bottom of the phone screen */
+  .cta {
+    @apply block w-full rounded-full py-[1.2rem] text-center text-[1.2rem] font-semibold transition active:scale-[.99];
+    box-shadow:
+      0 18px 40px -18px rgb(0 0 0 / 0.42),
+      0 6px 14px -8px rgb(0 0 0 / 0.18);
+  }
+  .cta:disabled {
+    box-shadow: none;
+  }
+  /* Full-width strip behind the bottom button that fades out smoothly */
+  .bottom-bar {
+    @apply fixed inset-x-0 bottom-0 z-20 pt-16 pb-[max(1.25rem,env(safe-area-inset-bottom))];
+  }
+  .fade-dark {
+    background: linear-gradient(
+      to top,
+      rgb(0 0 0 / 0.5) 0%,
+      rgb(0 0 0 / 0.45) 18%,
+      rgb(0 0 0 / 0.34) 36%,
+      rgb(0 0 0 / 0.21) 54%,
+      rgb(0 0 0 / 0.1) 72%,
+      rgb(0 0 0 / 0.03) 88%,
+      rgb(0 0 0 / 0) 100%
+    );
+  }
+  .fade-light {
+    background: linear-gradient(
+      to top,
+      rgb(250 246 243 / 1) 0%,
+      rgb(250 246 243 / 0.96) 30%,
+      rgb(250 246 243 / 0.8) 52%,
+      rgb(250 246 243 / 0.5) 72%,
+      rgb(250 246 243 / 0.18) 88%,
+      rgb(250 246 243 / 0) 100%
+    );
+  }
   .input {
     @apply block w-full rounded-xl bg-white px-4 py-3.5 text-base ring-1 ring-line outline-none placeholder:text-muted/60 focus:ring-2 focus:ring-ink;
   }
+}
+
+/* Pages with a bottom button: keep the footer links above it (outside @layer so it wins). */
+body:has(.bottom-bar) footer {
+  padding-bottom: 10.5rem;
 }

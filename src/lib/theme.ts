@@ -1,8 +1,15 @@
 import { cache } from "react";
 import { db } from "./db";
+import { ensureSchema } from "./migrate";
 
 /** The site's look, set in /admin → Seaded → Välimus. */
-export type Theme = { accent: string; bgDarkness: number; bgUrl: string };
+export type Theme = {
+  accent: string;
+  bgDarkness: number;
+  bgUrl: string;
+  /** Landing page text set in admin; null = use the built-in text */
+  tagline: { et: string | null; en: string | null };
+};
 
 export const DEFAULT_ACCENT = "#a65a2e"; // copper
 export const DEFAULT_DARKNESS = 45;
@@ -35,10 +42,14 @@ export const getTheme = cache(async function getTheme(): Promise<Theme> {
   let accent = DEFAULT_ACCENT;
   let bgDarkness = DEFAULT_DARKNESS;
   let bgUrl = DEFAULT_BG;
+  const tagline: Theme["tagline"] = { et: null, en: null };
+  await ensureSchema();
   try {
     const [s] = await sql`select * from settings where id = 1`;
     accent = cleanAccent(s?.accent_color);
     if (s?.bg_darkness != null) bgDarkness = cleanDarkness(s.bg_darkness);
+    tagline.et = typeof s?.tagline_et === "string" && s.tagline_et.trim() ? s.tagline_et.trim() : null;
+    tagline.en = typeof s?.tagline_en === "string" && s.tagline_en.trim() ? s.tagline_en.trim() : null;
   } catch (e) {
     console.error("theme: settings", e);
   }
@@ -48,7 +59,7 @@ export const getTheme = cache(async function getTheme(): Promise<Theme> {
   } catch {
     // assets table not created yet (db/migrations/002_appearance.sql): use the built-in photo
   }
-  return { accent, bgDarkness, bgUrl };
+  return { accent, bgDarkness, bgUrl, tagline };
 });
 
 /** CSS that sets the accent colour for the whole page. */

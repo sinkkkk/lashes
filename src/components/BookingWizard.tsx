@@ -148,7 +148,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
   const titles: Record<Step, string> = { service: t.stepService, time: t.stepTime, details: t.stepDetails, done: "" };
 
   return (
-    <div className="px-5 pb-32">
+    <div className="px-5 pb-40">
       {step !== "done" && (
         <div className="mt-2 mb-5">
           <div className="flex items-center gap-3">
@@ -276,7 +276,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
             <button
               disabled={!slot}
               onClick={() => go("details")}
-              className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-lg transition disabled:bg-line disabled:text-muted disabled:shadow-none"
+              className="cta bg-ink text-white disabled:bg-line disabled:text-muted"
             >
               {slot ? `${t.continue} · ${slotLabel(slot)}` : t.continue}
             </button>
@@ -321,7 +321,7 @@ export function BookingWizard(props: { lang: Lang; services: WizardService[]; te
           </label>
 
           <BottomBar>
-            <button type="submit" disabled={busy || !accepted} className="w-full rounded-full bg-ink py-4 text-lg font-semibold text-white shadow-lg transition disabled:bg-line disabled:text-muted disabled:shadow-none">
+            <button type="submit" disabled={busy || !accepted} className="cta bg-ink text-white disabled:bg-line disabled:text-muted">
               {busy ? t.sending : t.confirm}
             </button>
           </BottomBar>
@@ -384,8 +384,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function BottomBar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md bg-gradient-to-t from-cream via-cream/95 to-transparent px-5 pt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-      {children}
+    <div className="bottom-bar fade-light">
+      <div className="mx-auto max-w-md px-5">{children}</div>
     </div>
   );
 }

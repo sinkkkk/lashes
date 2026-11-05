@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { endSession, passwordMatches, requireAdmin, startSession } from "@/lib/auth";
 import { db, type Booking } from "@/lib/db";
+import { ensureSchema } from "@/lib/migrate";
 import { onBookingCancelled } from "@/lib/notify";
 
 export async function loginAction(_prev: unknown, form: FormData) {
@@ -82,18 +83,24 @@ export async function deleteReviewAction(id: string) {
   revalidatePath("/", "layout");
 }
 
-export async function saveSettingsAction(form: FormData) {
+export async function saveSettingsAction(_prev: unknown, form: FormData): Promise<{ ok: boolean; at: number }> {
   await requireAdmin();
   const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(x || lo)));
-  await db()`
-    update settings set
-      slot_step_min = ${clamp(num(form, "slot_step_min"), 5, 120)},
-      min_notice_hours = ${clamp(num(form, "min_notice_hours"), 0, 336)},
-      max_days_ahead = ${clamp(num(form, "max_days_ahead"), 1, 365)},
-      terms_et = ${str(form, "terms_et")},
-      terms_en = ${str(form, "terms_en")}
-    where id = 1`;
+  try {
+    await db()`
+      update settings set
+        slot_step_min = ${clamp(num(form, "slot_step_min"), 5, 120)},
+        min_notice_hours = ${clamp(num(form, "min_notice_hours"), 0, 336)},
+        max_days_ahead = ${clamp(num(form, "max_days_ahead"), 1, 365)},
+        terms_et = ${str(form, "terms_et")},
+        terms_en = ${str(form, "terms_en")}
+      where id = 1`;
+  } catch (e) {
+    console.error("saveSettings", e);
+    return { ok: false, at: Date.now() };
+  }
   revalidatePath("/", "layout");
+  return { ok: true, at: Date.now() };
 }
 
 export async function disconnectGoogleAction() {
@@ -108,8 +115,24 @@ type LookResult = { ok: true } | { ok: false; error: "migration" | "invalid" | "
 
 const needsMigration = (e: unknown) => ["42703", "42P01"].includes((e as { code?: string }).code ?? "");
 
+/** Landing page text; an empty field means "use the built-in text". */
+export async function saveTaglineAction(et: string, en: string): Promise<LookResult> {
+  await requireAdmin();
+  const clean = (x: string) => (String(x ?? "").trim().slice(0, 200) || null);
+  await ensureSchema();
+  try {
+    await db()`update settings set tagline_et = ${clean(et)}, tagline_en = ${clean(en)} where id = 1`;
+  } catch (e) {
+    if (needsMigration(e)) return { ok: false, error: "migration" };
+    throw e;
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
 export async function saveAppearanceAction(accent: string, darkness: number): Promise<LookResult> {
   await requireAdmin();
+  await ensureSchema();
   if (!/^#[0-9a-f]{6}$/i.test(accent)) return { ok: false, error: "invalid" };
   const d = Math.min(90, Math.max(0, Math.round(Number(darkness) || 0)));
   try {
@@ -126,6 +149,7 @@ const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function uploadBackgroundAction(form: FormData): Promise<LookResult> {
   await requireAdmin();
+  await ensureSchema();
   const file = form.get("photo");
   if (!(file instanceof File) || !IMAGE_TYPES.includes(file.type)) return { ok: false, error: "invalid" };
   if (file.size > 3 * 1024 * 1024) return { ok: false, error: "too_big" };

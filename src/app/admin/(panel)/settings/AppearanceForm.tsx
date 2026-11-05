@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { resetBackgroundAction, saveAppearanceAction, uploadBackgroundAction } from "../../actions";
+import { resetBackgroundAction, saveAppearanceAction, saveTaglineAction, uploadBackgroundAction } from "../../actions";
 
 type Preset = { name: string; hex: string };
 
 const MESSAGES = {
-  migration: "Enne seda lisa andmebaasi uued väljad: Supabase → SQL Editor → kleebi faili db/migrations/002_appearance.sql sisu → Run.",
+  migration: "Andmebaasi uuendamine ebaõnnestus. Proovi mõne minuti pärast uuesti.",
   invalid: "See fail ei sobi. Kasuta JPG, PNG või WebP pilti.",
   too_big: "Pilt on liiga suur. Proovi teist pilti.",
 } as const;
@@ -37,7 +37,17 @@ async function shrink(file: File, maxWidth = 1200): Promise<Blob> {
   }
 }
 
-export function AppearanceForm(props: { accent: string; darkness: number; bgUrl: string; isDefaultBg: boolean; presets: Preset[] }) {
+type Tagline = { et: string | null; en: string | null };
+
+export function AppearanceForm(props: {
+  accent: string;
+  darkness: number;
+  bgUrl: string;
+  isDefaultBg: boolean;
+  presets: Preset[];
+  tagline: Tagline;
+  defaultTagline: { et: string; en: string };
+}) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [accent, setAccent] = useState(props.accent);
@@ -46,6 +56,9 @@ export function AppearanceForm(props: { accent: string; darkness: number; bgUrl:
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   const dirty = accent !== props.accent || darkness !== props.darkness;
+  const [taglineEt, setTaglineEt] = useState(props.tagline.et ?? "");
+  const [taglineEn, setTaglineEn] = useState(props.tagline.en ?? "");
+  const taglineDirty = taglineEt !== (props.tagline.et ?? "") || taglineEn !== (props.tagline.en ?? "");
 
   const show = (r: { ok: true } | { ok: false; error: keyof typeof MESSAGES }, okText: string) => {
     setMessage(r.ok ? { ok: true, text: okText } : { ok: false, text: MESSAGES[r.error] });
@@ -88,7 +101,7 @@ export function AppearanceForm(props: { accent: string; darkness: number; bgUrl:
           <img src={bgUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0" style={{ background: `rgb(0 0 0 / ${darkness}%)` }} />
           <div className="relative flex h-full flex-col justify-end p-3">
-            <p className="font-display text-lg leading-tight text-[#fbf3ec]">Ripsmepikendused, mis püsivad</p>
+            <p className="line-clamp-3 font-display text-lg leading-tight text-[#fbf3ec]">{taglineEt.trim() || props.defaultTagline.et}</p>
             <p className="mt-1 text-xs text-accent-light">★★★★★</p>
             <div className="mt-2 rounded-lg bg-white/10 px-2 py-1.5 text-[11px] text-white ring-1 ring-white/15">
               Volüümripsmed <span className="float-right text-accent-light">65 €</span>
@@ -147,6 +160,36 @@ export function AppearanceForm(props: { accent: string; darkness: number; bgUrl:
         className="mt-4 w-full rounded-full bg-ink py-3 font-semibold text-white disabled:bg-line disabled:text-muted"
       >
         {pending ? "…" : "Salvesta värv ja tumedus"}
+      </button>
+
+      {/* Landing page text */}
+      <p className="mt-6 mb-2 text-xs font-medium text-muted">Avalehe tekst (suur pealkiri)</p>
+      <textarea
+        value={taglineEt}
+        onChange={(e) => setTaglineEt(e.target.value)}
+        maxLength={200}
+        rows={2}
+        placeholder={props.defaultTagline.et}
+        aria-label="Avalehe tekst eesti keeles"
+        className="input resize-none"
+      />
+      <textarea
+        value={taglineEn}
+        onChange={(e) => setTaglineEn(e.target.value)}
+        maxLength={200}
+        rows={2}
+        placeholder={props.defaultTagline.en}
+        aria-label="Landing page text in English"
+        className="input mt-2 resize-none"
+      />
+      <p className="mt-1 text-xs text-muted">Esimene eesti, teine inglise keeles. Tühi lahter = vaikimisi tekst (hall).</p>
+      <button
+        type="button"
+        disabled={!taglineDirty || pending}
+        onClick={() => start(async () => show(await saveTaglineAction(taglineEt, taglineEn), "Avalehe tekst salvestatud!"))}
+        className="mt-3 w-full rounded-full bg-ink py-3 font-semibold text-white disabled:bg-line disabled:text-muted"
+      >
+        {pending ? "…" : "Salvesta tekst"}
       </button>
 
       {/* Background photo */}
