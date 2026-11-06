@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dict, type Lang } from "@/lib/i18n";
 import { AddToCalendar } from "./AddToCalendar";
+import { ColorTab } from "./ColorTab";
 import { ServiceImage } from "./ServiceImage";
 
 export type WizardService = {
@@ -13,6 +14,8 @@ export type WizardService = {
   duration: string;
   durationMin: number;
   price: string;
+  /** Service colour (lash type) set in admin, shown as a small tab */
+  color: string | null;
   photo: string;
   nextFree: string | null;
 };
@@ -196,8 +199,9 @@ export function BookingWizard(props: {
                   setServiceId(s.id);
                   go("time");
                 }}
-                className="flex w-full gap-4 rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-line active:scale-[.99]"
+                className="relative flex w-full gap-4 overflow-hidden rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-line active:scale-[.99]"
               >
+                <ColorTab color={s.color} />
                 <ServiceImage src={s.photo} alt="" className="h-24 w-24 shrink-0 rounded-xl" />
                 <div className="flex min-w-0 flex-1 flex-col py-0.5">
                   <div className="flex items-start justify-between gap-2">
@@ -221,7 +225,8 @@ export function BookingWizard(props: {
       {/* 2. Time */}
       {step === "time" && service && (
         <>
-          <button onClick={() => window.history.back()} className="mb-5 flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-left ring-1 ring-line">
+          <button onClick={() => window.history.back()} className="relative mb-5 flex w-full items-center justify-between overflow-hidden rounded-2xl bg-white px-4 py-3 text-left ring-1 ring-line">
+            <ColorTab color={service.color} />
             <span>
               <span className="block font-semibold">{service.name}</span>
               <span className="text-sm text-muted">{service.duration} · {service.price}</span>
@@ -296,7 +301,8 @@ export function BookingWizard(props: {
       {/* 3. Details */}
       {step === "details" && service && slot && (
         <form onSubmit={submit} className="space-y-4">
-          <div className="rounded-2xl bg-white p-4 ring-1 ring-line">
+          <div className="relative overflow-hidden rounded-2xl bg-white p-4 ring-1 ring-line">
+            <ColorTab color={service.color} />
             <p className="font-semibold">{service.name}</p>
             <p className="text-sm text-muted first-letter:uppercase">
               {dayLabel(slot.day, { weekday: "long", day: "numeric", month: "long" })}, {slot.time} · {service.duration}

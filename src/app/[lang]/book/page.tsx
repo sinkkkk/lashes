@@ -26,6 +26,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/[la
     durationMin: s.duration_min,
     price: formatPrice(s.price_eur),
     photo: s.photo_url,
+    color: s.color,
     nextFree: nextFree[i] ? fmt(nextFree[i], lang === "et" ? "EEEEEE d. MMM HH:mm" : "EEE d MMM HH:mm", lang) : null,
   }));
 
