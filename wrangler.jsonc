@@ -19,7 +19,13 @@
   // Keep the variables set in the Cloudflare dashboard on every deploy
   "keep_vars": true,
   // Database connection through Hyperdrive ("lashes-db"): Cloudflare can't open an SSL connection to
-  // Supabase directly. For `npm run cf:preview`, set
-  // CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE to a local database URL.
-  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "ddca0bdb71fe4a4f92b262c0231443df" }]
+  // Supabase directly. localConnectionString is only used on your own computer (`npm run cf:preview`,
+  // and the deploy step needs one to be set); point it at a local database if you test locally.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "ddca0bdb71fe4a4f92b262c0231443df",
+      "localConnectionString": "postgres://postgres:postgres@127.0.0.1:5432/postgres"
+    }
+  ]
 }
