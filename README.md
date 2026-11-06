@@ -53,7 +53,11 @@ The settings are in [`wrangler.jsonc`](wrangler.jsonc).
 3. **Settings → Variables and Secrets**: add the values from [`.env.example`](.env.example) (at least the
    "Required" ones, plus `RESEND_API_KEY`, a random `CRON_SECRET`, and `NTFY_TOPIC` if you use phone
    notifications). Store the passwords and keys as **Secret**.
-4. **Settings → Domains & Routes → Add → Custom domain**: add `hilleliis.ee` and `www.hilleliis.ee`
+4. **Database connection (Hyperdrive):** Cloudflare can't open an SSL connection to Supabase directly, so
+   the site connects through Hyperdrive. **Storage & databases → Hyperdrive → Create configuration**: paste
+   `DATABASE_URL` with the port changed from `6543` to `5432` (Supabase's session pooler) and switch
+   **caching off**. Put its ID in [`wrangler.jsonc`](wrangler.jsonc) under `hyperdrive`.
+5. **Settings → Domains & Routes → Add → Custom domain**: add `hilleliis.ee` and `www.hilleliis.ee`
    (the domain's DNS must be on Cloudflare). HTTPS is set up automatically.
 
 The daily job (reminders + review requests) is a Cron Trigger in `wrangler.jsonc` that calls `/api/cron`

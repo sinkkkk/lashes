@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Room for a background photo uploaded from /admin (it is shrunk in the browser first).
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
+  // Not bundled by Next, so the Cloudflare build picks the driver's own Workers version
+  // (Cloudflare sockets with TLS) instead of the Node.js one.
+  serverExternalPackages: ["postgres"],
   // Fonts read at run time by the review image route; make sure Vercel ships them.
   outputFileTracingIncludes: { "/api/admin/review-image/**": ["./public/fonts/**"] },
   async redirects() {

@@ -9,16 +9,24 @@ const g = globalThis as unknown as { __sql?: Sql };
 /** True when running on Cloudflare Workers. */
 const onCloudflare = () => typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
-function connect(cloudflare = false): Sql {
-  const url = process.env.DATABASE_URL;
+/**
+ * On Cloudflare the database is reached through Hyperdrive (binding HYPERDRIVE in wrangler.jsonc).
+ * Cloudflare can't open an SSL connection to Supabase itself (Supabase's certificate isn't from a
+ * public authority); Hyperdrive does that part and keeps connections warm next to the database.
+ */
+type Hyperdrive = { connectionString: string };
+
+function connect(cloudflare = false, hyperdrive?: Hyperdrive): Sql {
+  const url = hyperdrive?.connectionString ?? process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set (see .env.example)");
   const local = /localhost|127\.0\.0\.1|host=\/tmp/.test(url);
   return postgres(url, {
-    max: cloudflare ? 1 : 5,
+    max: 5,
     // On Cloudflare every page view has its own connection, so skip the extra type lookup.
     fetch_types: !cloudflare,
     prepare: false, // works with Supabase's connection pooler
-    ssl: local ? false : "require",
+    // Hyperdrive is reached inside Cloudflare's network and does the SSL to Supabase itself.
+    ssl: local || hyperdrive ? false : "require",
     idle_timeout: 20,
     // A connection that can't be opened within 10s is given up on (default 30s), so a rare
     // stuck connection on a freshly started server doesn't leave a page hanging.
@@ -35,10 +43,10 @@ const perRequest = new WeakMap<object, Sql>();
 /** Lazily created so that `next build` works without a database. */
 export function db(): Sql {
   if (onCloudflare()) {
-    const { ctx } = getCloudflareContext();
+    const { ctx, env } = getCloudflareContext();
     let sql = perRequest.get(ctx);
     if (!sql) {
-      sql = connect(true);
+      sql = connect(true, (env as { HYPERDRIVE?: Hyperdrive }).HYPERDRIVE);
       perRequest.set(ctx, sql);
     }
     return sql;
