@@ -39,7 +39,7 @@ body {
 
 /* Admin calendar (FullCalendar) */
 .fc {
-  --fc-border-color: #efe8e3;
+  --fc-border-color: color-mix(in oklab, var(--color-line) 70%, white);
   --fc-today-bg-color: color-mix(in oklab, var(--color-accent) 5%, white);
   --fc-now-indicator-color: #e5322d; /* always red, whatever the accent colour */
   --free: #3f7a4c;
@@ -265,12 +265,12 @@ body {
   .fade-light {
     background: linear-gradient(
       to top,
-      rgb(250 246 243 / 1) 0%,
-      rgb(250 246 243 / 0.96) 30%,
-      rgb(250 246 243 / 0.8) 52%,
-      rgb(250 246 243 / 0.5) 72%,
-      rgb(250 246 243 / 0.18) 88%,
-      rgb(250 246 243 / 0) 100%
+      var(--color-cream) 0%,
+      color-mix(in srgb, var(--color-cream) 96%, transparent) 30%,
+      color-mix(in srgb, var(--color-cream) 80%, transparent) 52%,
+      color-mix(in srgb, var(--color-cream) 50%, transparent) 72%,
+      color-mix(in srgb, var(--color-cream) 18%, transparent) 88%,
+      transparent 100%
     );
   }
   .input {
@@ -307,4 +307,19 @@ body:has(.bottom-bar) footer {
   .admin-theme {
     --color-accent: oklch(from var(--accent, #a65a2e) min(l, 0.5) c h);
   }
+}
+
+/*
+ * Soft pastel palette for the admin panel and the light customer pages (booking steps etc.):
+ * page background, cards' surroundings, borders and grey text are gentle tints of the accent
+ * colour chosen in /admin → Välimus (pink accent → pastel pink, copper → soft peach, …).
+ * Uses the raw --accent, not the darker admin text shade.
+ */
+.tinted {
+  --color-cream: color-mix(in oklab, var(--accent, #a65a2e) 7%, white);
+  --color-sand: color-mix(in oklab, var(--accent, #a65a2e) 15%, white);
+  --color-line: color-mix(in oklab, var(--accent, #a65a2e) 22%, white);
+  --color-muted: color-mix(in oklab, var(--accent, #a65a2e) 22%, #6b6062);
+  --color-ink: color-mix(in oklab, var(--accent, #a65a2e) 14%, #24170f);
+  background: var(--color-cream);
 }

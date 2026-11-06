@@ -23,7 +23,7 @@ export default async function AdminRoot({ children }: { children: React.ReactNod
       <head>
         <style>{themeCss(theme)}</style>
       </head>
-      <body className="admin-theme min-h-dvh font-sans">{children}</body>
+      <body className="admin-theme tinted min-h-dvh font-sans">{children}</body>
     </html>
   );
 }

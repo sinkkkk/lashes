@@ -32,7 +32,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
       <head>
         <style>{themeCss(theme)}</style>
       </head>
-      <body className="min-h-dvh font-sans">
+      <body className="tinted min-h-dvh font-sans">
         <div className="mx-auto flex min-h-dvh max-w-md flex-col">
           <header className="flex items-center justify-between px-5 pt-5 pb-2">
             <Link href={`/${lang}`} className="flex items-center gap-2">
