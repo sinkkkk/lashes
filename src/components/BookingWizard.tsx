@@ -334,6 +334,7 @@ export function BookingWizard(props: {
               </button>
             </span>
           </label>
+          <p className="-mt-1 px-1 text-xs leading-relaxed text-muted">{t.emailNotice}</p>
 
           <BottomBar>
             <button type="submit" disabled={busy || !accepted} className="cta bg-ink text-white disabled:bg-line disabled:text-muted">
@@ -380,6 +381,12 @@ export function BookingWizard(props: {
           <div className="mx-auto max-h-[80dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-cream p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-3 font-display text-2xl font-semibold">{t.terms}</h2>
             <p className="text-[15px] leading-relaxed whitespace-pre-line">{terms}</p>
+            <h3 className="mt-5 mb-2 font-semibold">{t.dataTitle}</h3>
+            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted">
+              {t.dataPoints.map((x) => (
+                <li key={x}>{x}</li>
+              ))}
+            </ul>
             <button
               onClick={() => {
                 setAccepted(true);

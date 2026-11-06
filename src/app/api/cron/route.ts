@@ -1,4 +1,5 @@
 import { db, type Booking, type Service } from "@/lib/db";
+import { ensureSchema } from "@/lib/migrate";
 import { sendReminder, sendReviewRequest } from "@/lib/notify";
 import { dayKey, startOfDayTallinn } from "@/lib/time";
 
@@ -12,6 +13,7 @@ export async function GET(req: Request) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
     return new Response("Unauthorized", { status: 401 });
   }
+  await ensureSchema();
   const sql = db();
   const today = dayKey(new Date());
   const tomorrowStart = startOfDayTallinn(dayKey(new Date(startOfDayTallinn(today).getTime() + 36 * 3600_000)));
@@ -31,7 +33,8 @@ export async function GET(req: Request) {
     select b.* from bookings b
     where b.status = 'confirmed' and b.review_requested_at is null
       and b.ends_at < now() - interval '1 hour' and b.ends_at > now() - interval '7 days'
-      and not exists (select 1 from reviews r where r.booking_id = b.id)`;
+      and not exists (select 1 from reviews r where r.booking_id = b.id)
+      and not exists (select 1 from email_optouts o where o.email = lower(b.email))`;
   for (const r of reviews) {
     await sendReviewRequest(r as unknown as Booking);
     await sql`update bookings set review_requested_at = now() where id = ${r.id}`;

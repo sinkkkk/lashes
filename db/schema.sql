@@ -112,3 +112,10 @@ alter table services add column if not exists color text;
 
 -- Landing page lash icon colour (same as db/migrations/006_icon_color.sql)
 alter table settings add column if not exists icon_color text;
+
+-- Feedback email opt-outs (same as db/migrations/007_email_optouts.sql)
+create table if not exists email_optouts (
+  email      text primary key,
+  created_at timestamptz not null default now()
+);
+alter table email_optouts enable row level security;

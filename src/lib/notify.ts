@@ -10,12 +10,12 @@ import { fmt, formatPrice } from "./time";
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-function layout(body: string) {
+function layout(body: string, footer = "") {
   return `<!doctype html><html><body style="margin:0;background:#faf6f3;font-family:Helvetica,Arial,sans-serif;color:#2b2523">
   <div style="max-width:480px;margin:0 auto;padding:32px 20px">
     <div style="font-family:Georgia,serif;font-size:22px;letter-spacing:.5px;margin-bottom:24px">${esc(site.name)}</div>
     <div style="background:#fff;border-radius:16px;padding:24px;line-height:1.55">${body}</div>
-    <div style="font-size:12px;color:#8a7f7a;margin-top:20px">${esc(site.address)}</div>
+    <div style="font-size:12px;color:#8a7f7a;margin-top:20px">${esc(site.address)}${footer}</div>
   </div></body></html>`;
 }
 
@@ -147,6 +147,10 @@ export async function sendReminder(b: Booking, s: Service) {
 export async function sendReviewRequest(b: Booking) {
   const et = b.lang === "et";
   const url = `${site.url}/${b.lang}/review/${b.token}`;
+  const stop = `${site.url}/${b.lang}/unsubscribe/${b.token}`;
+  const footer = et
+    ? `<br><br><a href="${stop}" style="color:#8a7f7a">Ära saada mulle rohkem tagasiside palveid</a>`
+    : `<br><br><a href="${stop}" style="color:#8a7f7a">Don't send me feedback requests</a>`;
   await sendEmail({
     to: b.email,
     subject: et ? "Kuidas ripsmed meeldivad? 💕" : "How do you like your lashes? 💕",
@@ -154,6 +158,7 @@ export async function sendReviewRequest(b: Booking) {
       et
         ? `<p>Tere, ${esc(b.customer_name)}! Aitäh, et käisid.</p><p>Kas leiaksid hetke, et anda tagasisidet? See võtab 20 sekundit.</p><p style="font-size:28px;letter-spacing:6px">★★★★★</p><p>${button(url, "Anna hinnang")}</p>`
         : `<p>Hi ${esc(b.customer_name)}! Thank you for visiting.</p><p>Could you leave a quick review? It takes 20 seconds.</p><p style="font-size:28px;letter-spacing:6px">★★★★★</p><p>${button(url, "Leave a review")}</p>`,
+      footer,
     ),
   });
 }

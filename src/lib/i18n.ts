@@ -60,6 +60,20 @@ const et = {
   thanksReview: "Aitäh! Review ilmub lehele peale ülevaatust.",
   alreadyReviewed: "Selle külastuse kohta on review juba olemas. Aitäh!",
   shareExperience: "Jaga oma kogemust",
+  // fixed texts about data and emails (not editable in admin)
+  emailNotice: "Saadame sulle e-postile broneeringu kinnituse, meeldetuletuse ja pärast külastust palve tagasiside jaoks.",
+  dataTitle: "Andmed ja e-kirjad",
+  dataPoints: [
+    "Broneerimiseks salvestame sinu nime, telefoninumbri, e-posti ja lisainfo. Kasutame neid ainult sinu broneeringu haldamiseks ega jaga neid kellegagi peale teenusepakkujate, kes aitavad meil lehte hoida ning e-kirju saata.",
+    "Saadame sulle e-postile broneeringu kinnituse, meeldetuletuse päev enne aega ja teate, kui broneering tühistatakse. Need kirjad on teenuse osutamiseks vajalikud.",
+    "Pärast külastust saadame ühe palve tagasiside jaoks. Kui sa seda ei soovi, vajuta kirja lõpus olevale lingile „Ära saada mulle rohkem tagasiside palveid“.",
+    "Kui soovid oma andmeid näha, parandada või kustutada, vasta lihtsalt ükskõik millisele meie e-kirjale.",
+  ],
+  unsubscribeTitle: "Tagasiside palved",
+  unsubscribeText: (email: string) =>
+    `Me ei saada aadressile ${email} enam palveid tagasiside jaoks. Broneeringu kinnitused ja meeldetuletused tulevad edasi.`,
+  unsubscribeButton: "Ära saada rohkem tagasiside palveid",
+  unsubscribeDone: "Tehtud! Me ei saada sulle enam tagasiside palveid.",
   shareIntro: "Kuidas ripsmed meeldisid? Sinu review aitab teistel otsustada.",
 };
 
@@ -117,6 +131,19 @@ const en: Dict = {
   thanksReview: "Thank you! Your review will appear after a quick check.",
   alreadyReviewed: "This visit already has a review. Thank you!",
   shareExperience: "Share your experience",
+  emailNotice: "We'll email you a booking confirmation, a reminder, and after your visit a request for feedback.",
+  dataTitle: "Your data and emails",
+  dataPoints: [
+    "To book, we store your name, phone number, email and note. We use them only to manage your booking and don't share them with anyone except the service providers that host this site and send our emails.",
+    "We email you a booking confirmation, a reminder the day before, and a notice if a booking is cancelled. These emails are needed to provide the service.",
+    "After your visit we send one request for feedback. If you don't want these, tap “Don't send me feedback requests” at the bottom of that email.",
+    "To see, correct or delete your data, just reply to any of our emails.",
+  ],
+  unsubscribeTitle: "Feedback requests",
+  unsubscribeText: (email: string) =>
+    `We won't send feedback requests to ${email} anymore. Booking confirmations and reminders will still arrive.`,
+  unsubscribeButton: "Stop feedback requests",
+  unsubscribeDone: "Done! We won't send you feedback requests anymore.",
   shareIntro: "How did you like your lashes? Your review helps others decide.",
 };
 

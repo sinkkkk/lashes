@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getBookingByToken } from "@/lib/booking";
 import { db } from "@/lib/db";
+import { ensureSchema } from "@/lib/migrate";
 import { onBookingCancelled } from "@/lib/notify";
 import { sendPush } from "@/lib/push";
 import { site } from "@/lib/site";
@@ -50,4 +51,13 @@ export async function submitPublicReviewAction(_prev: unknown, form: FormData) {
   );
   revalidatePath("/admin/reviews");
   return { done: true };
+}
+
+/** "Don't send me feedback requests" (link in the review request email). */
+export async function unsubscribeAction(token: string) {
+  const b = await getBookingByToken(token);
+  if (!b) return { ok: false };
+  await ensureSchema();
+  await db()`insert into email_optouts (email) values (${b.email.toLowerCase()}) on conflict (email) do nothing`;
+  return { ok: true };
 }

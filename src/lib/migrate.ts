@@ -39,6 +39,15 @@ const MIGRATIONS: { name: string; sql: string }[] = [
     name: "006_icon_color",
     sql: `alter table settings add column if not exists icon_color text;`,
   },
+  {
+    name: "007_email_optouts",
+    sql: `
+      create table if not exists email_optouts (
+        email      text primary key,
+        created_at timestamptz not null default now()
+      );
+      alter table email_optouts enable row level security;`,
+  },
 ];
 const NEEDED_COLUMNS: Record<string, string[]> = {
   settings: ["accent_color", "bg_darkness", "tagline_et", "tagline_en", "icon_color"],
@@ -60,10 +69,12 @@ async function run() {
   const cols = await sql`
     select table_name, column_name from information_schema.columns
     where table_schema = 'public' and table_name in ('settings', 'services')`;
-  const [{ assets }] = await sql`select to_regclass('public.assets') is not null as assets`;
+  const [{ assets, optouts }] = await sql`
+    select to_regclass('public.assets') is not null as assets,
+           to_regclass('public.email_optouts') is not null as optouts`;
   const have = new Set(cols.map((c) => `${c.table_name}.${c.column_name}`));
   const complete = Object.entries(NEEDED_COLUMNS).every(([table, names]) => names.every((n) => have.has(`${table}.${n}`)));
-  if (assets && complete) return;
+  if (assets && optouts && complete) return;
 
   for (const m of MIGRATIONS) {
     await sql.unsafe(m.sql);
