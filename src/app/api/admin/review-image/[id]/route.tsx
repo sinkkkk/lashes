@@ -51,6 +51,67 @@ export async function GET(req: Request, ctx: RouteContext<"/api/admin/review-ima
   const text = review.text.trim();
   const domain = site.url.replace(/^https?:\/\//, "");
 
+  if (format === "strip") {
+    // Thin 4:1 sticker with rounded, transparent corners: stars + name, the review, and the lash logo.
+    const strip = new ImageResponse(
+      (
+        <div style={{ width: "100%", height: "100%", display: "flex" }}>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 36,
+              padding: "30px 44px",
+              borderRadius: 56,
+              backgroundImage: `linear-gradient(135deg, ${t.from}, ${t.to})`,
+              color: t.text,
+              fontFamily: "Inter, InterExt",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, flexShrink: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <svg key={i} width={36} height={36} viewBox="0 0 20 20">
+                      <path d={STAR} fill={t.star} opacity={i <= review.rating ? 1 : 0.22} />
+                    </svg>
+                  ))}
+                </div>
+                <div style={{ display: "flex", fontWeight: 600, fontSize: 26, color: t.muted }}>— {review.name_display}</div>
+              </div>
+              {text && (
+                <div
+                  style={{
+                    display: "block",
+                    marginTop: 12,
+                    fontFamily: "Cormorant, CormorantExt",
+                    fontStyle: "italic",
+                    fontWeight: 500,
+                    fontSize: quoteFontSize(text, "strip"),
+                    lineHeight: 1.15,
+                    lineClamp: 3,
+                    overflow: "hidden",
+                  }}
+                >
+                  {text}
+                </div>
+              )}
+            </div>
+            <svg width={84} height={42} viewBox="0 0 64 32" fill="none" stroke={t.star} strokeWidth="2.6" strokeLinecap="round" style={{ flexShrink: 0 }}>
+              <path d="M4 10c8 12 48 12 56 0" />
+              <path d="M12 16.5l-3 7M20 19.5l-1.6 7.5M28 21l-.4 7.6M36 21l.4 7.6M44 19.5l1.6 7.5M52 16.5l3 7" />
+            </svg>
+          </div>
+        </div>
+      ),
+      { width: w, height: h, fonts },
+    );
+    strip.headers.set("Cache-Control", "private, max-age=300");
+    return strip;
+  }
+
   const image = new ImageResponse(
     (
       <div

@@ -13,7 +13,8 @@ describe("review image helpers", () => {
     expect(reviewFormat("square")).toBe("square");
     expect(reviewTheme("nonsense", "#a65a2e").id).toBe("roos");
     expect(reviewTheme("brand", "#ff5fb0").id).toBe("brand");
-    expect(Object.keys(REVIEW_FORMATS)).toEqual(["story", "post", "square"]);
+    expect(Object.keys(REVIEW_FORMATS)).toEqual(["story", "post", "square", "strip"]);
+    expect(REVIEW_FORMATS.strip.w / REVIEW_FORMATS.strip.h).toBe(4);
   });
   it("mixes colours", () => {
     expect(mix("#000000", "#ffffff", 0.5)).toBe("#808080");

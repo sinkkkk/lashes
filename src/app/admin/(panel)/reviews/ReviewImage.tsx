@@ -113,7 +113,7 @@ function ReviewImageSheet({ id, name, accent, onClose }: { id: string; name: str
       <h2 className="font-display text-xl font-semibold">Review pildiks</h2>
       <p className="text-sm text-muted">Instagrami ja TikToki jaoks. See kujundus on ainult pildil, mitte lehel.</p>
 
-      <div className="relative mx-auto mt-4 flex justify-center">
+      <div className={`relative mx-auto mt-4 flex justify-center ${prefs.format === "strip" ? "rounded-2xl bg-[#4a3833] p-3" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={src}
@@ -121,14 +121,14 @@ function ReviewImageSheet({ id, name, accent, onClose }: { id: string; name: str
           alt={`Review pilt: ${name}`}
           onLoad={() => setLoading(false)}
           onError={() => setLoading(false)}
-          className={`max-h-[46dvh] w-auto rounded-xl shadow-[0_14px_36px_-16px_rgb(0_0_0/0.4)] transition-opacity ${loading ? "opacity-40" : "opacity-100"}`}
+          className={`${prefs.format === "strip" ? "w-full" : "max-h-[46dvh] w-auto rounded-xl shadow-[0_14px_36px_-16px_rgb(0_0_0/0.4)]"} transition-opacity ${loading ? "opacity-40" : "opacity-100"}`}
           style={{ aspectRatio: `${REVIEW_FORMATS[prefs.format].w} / ${REVIEW_FORMATS[prefs.format].h}` }}
         />
         {loading && <span className="absolute inset-0 m-auto h-8 w-8 animate-spin rounded-full border-2 border-line border-t-ink" aria-hidden />}
       </div>
 
       <p className="mt-4 mb-1.5 text-xs font-medium text-muted">Formaat</p>
-      <div className="grid grid-cols-3 gap-1 rounded-full bg-sand p-1">
+      <div className="grid grid-cols-4 gap-1 rounded-full bg-sand p-1">
         {(Object.keys(REVIEW_FORMATS) as ReviewFormat[]).map((f) => (
           <button
             key={f}

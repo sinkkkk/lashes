@@ -7,6 +7,8 @@ export const REVIEW_FORMATS = {
   story: { w: 1080, h: 1920, label: "Story", scale: 1.1, textScale: 1.3 },
   post: { w: 1080, h: 1350, label: "Post", scale: 0.9, textScale: 1.02 },
   square: { w: 1080, h: 1080, label: "Ruut", scale: 0.78, textScale: 0.86 },
+  // A thin 4:1 "sticker" to stack several reviews in one story
+  strip: { w: 1080, h: 270, label: "Riba", scale: 0.5, textScale: 0.5 },
 } as const;
 export type ReviewFormat = keyof typeof REVIEW_FORMATS;
 
@@ -67,6 +69,7 @@ export function reviewFormat(f: string | null | undefined): ReviewFormat {
 /** Text size for the review: short reviews big, long ones smaller, so every image looks full. */
 export function quoteFontSize(text: string, format: ReviewFormat) {
   const n = text.trim().length;
+  if (format === "strip") return n <= 50 ? 46 : n <= 100 ? 40 : n <= 160 ? 34 : 30; // at most 3 lines
   const base = n <= 60 ? 84 : n <= 120 ? 70 : n <= 200 ? 58 : n <= 320 ? 48 : n <= 480 ? 40 : 34;
   return Math.round(base * REVIEW_FORMATS[format].textScale);
 }
