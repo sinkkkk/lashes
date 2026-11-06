@@ -1,6 +1,7 @@
 import type { Viewport } from "next";
 import Link from "next/link";
 import { ColorTab } from "@/components/ColorTab";
+import { colorTabPadding } from "@/lib/colors";
 import { ServiceImage } from "@/components/ServiceImage";
 import { Stars } from "@/components/Stars";
 import { getServices } from "@/lib/db";
@@ -68,7 +69,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           <li key={s.id}>
             <Link
               href={`/${lang}/book?service=${s.id}`}
-              className="relative flex items-center gap-4 overflow-hidden rounded-2xl bg-white/10 p-3 ring-1 ring-white/15 backdrop-blur-md active:scale-[.99] active:bg-white/15"
+              className={`relative flex items-center gap-4 overflow-hidden rounded-2xl bg-white/10 p-3 ring-1 ring-white/15 backdrop-blur-md active:scale-[.99] active:bg-white/15 ${colorTabPadding(...services.map((x) => x.color))}`}
             >
               <ColorTab color={s.color} />
               <ServiceImage src={s.photo_url} alt="" className="h-16 w-16 shrink-0 rounded-xl" />

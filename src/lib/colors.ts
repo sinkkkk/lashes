@@ -5,6 +5,14 @@ export function cleanColor(x: unknown): string | null {
   return typeof x === "string" && /^#[0-9a-f]{6}$/i.test(x.trim()) ? x.trim().toLowerCase() : null;
 }
 
+/**
+ * Left padding for cards with a colour tab: a little extra so the tab has the same gap before the
+ * content as the card's other edges. Pass every colour shown in a list, so all its cards line up.
+ */
+export function colorTabPadding(...colors: unknown[]): string {
+  return colors.some((c) => cleanColor(c)) ? "pl-4" : "";
+}
+
 /** White or dark text, whichever reads better on the given background colour. */
 export function readableText(bg: string): "#ffffff" | "#24170f" {
   const hex = cleanColor(bg);
