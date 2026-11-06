@@ -48,7 +48,7 @@ export default async function SiteLayout({ children, params }: LayoutProps<"/[la
               <Link href={`/${lang}/terms`}>{t.terms}</Link>
               {site.instagram && <a href={site.instagram}>Instagram</a>}
             </nav>
-            {site.area && <p>📍 {site.area}</p>}
+            {site.area && <p>{site.area}</p>}
             <p className="mt-1">© {new Date().getFullYear()} {site.name}</p>
           </footer>
         </div>

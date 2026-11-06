@@ -50,7 +50,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
         <h1 className="font-display text-[2.6rem] leading-[1.08] font-semibold text-[#fbf3ec] drop-shadow-[0_2px_12px_rgb(0_0_0/0.45)]">
           {theme.tagline[lang] ?? t.tagline}
         </h1>
-        {site.area && <p className="mt-3 text-sm font-medium text-white/80">📍 {site.area}</p>}
+        {site.area && <p className="mt-3 text-sm font-medium text-white/80">{site.area}</p>}
         {rating.count > 0 && (
           <Link href={`/${lang}/reviews`} className="mt-3 flex items-center gap-2 text-sm text-white/80">
             <Stars value={rating.avg} />
