@@ -44,17 +44,23 @@ FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
    `EMAIL_FROM=Lashes by Hille Liis <broneering@yourdomain.ee>`.
    (Until the domain is verified, Resend only lets you send to your own email.)
 
-### 3. Hosting: Vercel
+### 3. Hosting: Netlify (free plan, allowed for business use)
 1. Put this code on GitHub (already done if you're reading this there).
-2. At [vercel.com](https://vercel.com) → **Add New → Project** → import the repository.
-3. Add the environment variables from [`.env.example`](.env.example) (at least the "Required" ones,
-   plus `RESEND_API_KEY`, `EMAIL_FROM` and a random `CRON_SECRET`).
-4. **Deploy**. Then **Settings → Domains** → add your domain (e.g. `liisulashes.ee`) and set
-   `NEXT_PUBLIC_SITE_URL` to it.
+2. At [netlify.com](https://www.netlify.com), sign up with GitHub → **Add new project → Import an existing
+   project** → GitHub → pick the repository. The build settings come from [`netlify.toml`](netlify.toml).
+3. **Project configuration → Environment variables**: add the values from [`.env.example`](.env.example)
+   (at least the "Required" ones, plus `RESEND_API_KEY`, `EMAIL_FROM`, a random `CRON_SECRET`, and
+   `NTFY_TOPIC` if you use phone notifications).
+4. **Project configuration → Build & deploy → Functions region**: choose **EU (Ireland, eu-west-1)** if
+   offered, next to the Supabase database, so pages stay fast. Then **Deploys → Trigger deploy**.
+5. **Domain management** → add your domain (e.g. `hilleliis.ee`) and follow the DNS instructions; set
+   `NEXT_PUBLIC_SITE_URL` to it. HTTPS is set up automatically.
 
-The daily job (reminders + review requests) is already set in `vercel.json` and runs at 16:00 UTC (18:00/19:00 in Tallinn).
-`vercel.json` also runs the site in Vercel's Dublin region, next to a Supabase database in Ireland (`eu-west-1`).
-If your database is somewhere else, change `regions` to the closest one (e.g. `fra1` for Frankfurt).
+The daily job (reminders + review requests) is the scheduled function
+[`netlify/functions/daily.mjs`](netlify/functions/daily.mjs); it runs at 16:00 UTC (18:00/19:00 in Tallinn).
+
+*(The project also still runs on Vercel: [`vercel.json`](vercel.json) holds its daily job and Dublin region.
+Vercel's free Hobby plan is for non-commercial use only, which is why Netlify is the recommended host.)*
 
 ### 4. Apple Calendar (built in, nothing to set up)
 On your iPhone, open `/admin` → **Seaded** → **Lisa Apple kalendrisse** → **Subscribe**.
