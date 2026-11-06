@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { BookingWizard, type WizardService } from "@/components/BookingWizard";
-import { getSlots } from "@/lib/booking";
+import { getSlotsForServices } from "@/lib/booking";
 import { getServices, getSettings } from "@/lib/db";
 import { dict, isLang, type Lang } from "@/lib/i18n";
 import { site } from "@/lib/site";
@@ -16,7 +16,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/[la
   const lang: Lang = isLang(l) ? l : "et";
   const { service } = await searchParams;
   const [services, settings] = await Promise.all([getServices(), getSettings()]);
-  const nextFree = await Promise.all(services.map((s) => getSlots(s, settings).then((x) => x[0])));
+  const nextFree = (await getSlotsForServices(services, settings)).map((x) => x[0]);
 
   const list: WizardService[] = services.map((s, i) => ({
     id: s.id,

@@ -12,6 +12,14 @@ export function bookingWindow(settings: Settings, now = new Date()) {
 
 /** All bookable start times for one service, from now until the booking horizon. */
 export async function getSlots(service: Service, settings?: Settings): Promise<Date[]> {
+  return (await getSlotsForServices([service], settings))[0];
+}
+
+/**
+ * Bookable start times for several services at once. The free time and bookings are loaded
+ * only once (2 queries in total), however many services there are.
+ */
+export async function getSlotsForServices(services: Service[], settings?: Settings): Promise<Date[][]> {
   const s = settings ?? (await getSettings());
   const { notBefore, notAfter } = bookingWindow(s);
   const until = addMinutes(notAfter, 24 * 60);
@@ -23,15 +31,17 @@ export async function getSlots(service: Service, settings?: Settings): Promise<D
         where status = 'confirmed' and blocked_until > ${notBefore}::timestamptz
           and starts_at < ${until}::timestamptz`,
   ]);
-  return computeSlots({
-    availability: availability as unknown as { start: Date; end: Date }[],
-    busy: busy as unknown as { start: Date; end: Date }[],
-    durationMin: service.duration_min,
-    bufferMin: service.buffer_min,
-    stepMin: s.slot_step_min,
-    notBefore,
-    notAfter,
-  });
+  return services.map((service) =>
+    computeSlots({
+      availability: availability as unknown as { start: Date; end: Date }[],
+      busy: busy as unknown as { start: Date; end: Date }[],
+      durationMin: service.duration_min,
+      bufferMin: service.buffer_min,
+      stepMin: s.slot_step_min,
+      notBefore,
+      notAfter,
+    }),
+  );
 }
 
 export type NewBooking = {

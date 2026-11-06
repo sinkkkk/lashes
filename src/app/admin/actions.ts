@@ -231,3 +231,20 @@ export async function saveIconColorAction(color: string | null): Promise<LookRes
   revalidatePath("/", "layout");
   return { ok: true };
 }
+
+/** Saves the order of services after drag-and-drop (first = shown first to customers). */
+export async function reorderServicesAction(ids: string[]): Promise<{ ok: boolean }> {
+  await requireAdmin();
+  const clean = ids.filter((id) => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id)).slice(0, 200);
+  if (!clean.length) return { ok: false };
+  try {
+    await db().begin(async (sql) => {
+      for (const [i, id] of clean.entries()) await sql`update services set sort = ${i + 1} where id = ${id}`;
+    });
+  } catch (e) {
+    console.error("reorderServices", e);
+    return { ok: false };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

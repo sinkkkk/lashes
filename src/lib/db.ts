@@ -14,6 +14,9 @@ function connect(): Sql {
     prepare: false, // works with Supabase's connection pooler
     ssl: local ? false : "require",
     idle_timeout: 20,
+    // A connection that can't be opened within 10s is given up on (default 30s), so a rare
+    // stuck connection on a freshly started server doesn't leave a page hanging.
+    connect_timeout: 10,
   });
 }
 

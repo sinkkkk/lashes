@@ -2,6 +2,7 @@ import { db, getServices, type Service } from "@/lib/db";
 import { saveServiceAction } from "../../actions";
 import { DeleteServiceButton } from "./DeleteServiceButton";
 import { ServiceColorField, type UsedColor } from "./ServiceColorField";
+import { SortableServices } from "./SortableServices";
 
 export default async function ServicesPage() {
   const [services, counts] = await Promise.all([
@@ -19,27 +20,32 @@ export default async function ServicesPage() {
       <p className="text-sm text-muted">
         Iga teenuse pikkus määrab, millised ajad kliendile pakutakse. &quot;Puhver&quot; on koristus- või pausiaeg pärast protseduuri.
       </p>
-      {services.map((s) => (
-        <details key={s.id} className="group rounded-2xl bg-white ring-1 ring-line">
-          <summary className="flex cursor-pointer list-none items-center justify-between p-4">
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/5" style={{ background: s.color ?? "var(--color-accent)" }} />
-              <span>
-              <span className="font-semibold">{s.name_et}</span>
-              {!s.active && <span className="ml-2 text-xs text-accent">peidetud</span>}
-              <span className="block text-sm text-muted">
-                {s.duration_min} min · {s.price_eur} €
+      <SortableServices
+        items={services.map((s) => ({
+          id: s.id,
+          summary: (
+            <>
+              <span className="flex items-center gap-3">
+                <span aria-hidden className="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/5" style={{ background: s.color ?? "var(--color-accent)" }} />
+                <span>
+                  <span className="font-semibold">{s.name_et}</span>
+                  {!s.active && <span className="ml-2 text-xs text-accent">peidetud</span>}
+                  <span className="block text-sm text-muted">
+                    {s.duration_min} min · {s.price_eur} €
+                  </span>
+                </span>
               </span>
-              </span>
-            </span>
-            <span className="text-muted transition group-open:rotate-90">›</span>
-          </summary>
-          <div className="border-t border-line p-4">
-            <ServiceForm s={s} used={used} />
-            <DeleteServiceButton id={s.id} name={s.name_et} upcoming={upcoming.get(s.id) ?? 0} />
-          </div>
-        </details>
-      ))}
+              <span className="text-muted transition group-open:rotate-90">›</span>
+            </>
+          ),
+          body: (
+            <>
+              <ServiceForm s={s} used={used} />
+              <DeleteServiceButton id={s.id} name={s.name_et} upcoming={upcoming.get(s.id) ?? 0} />
+            </>
+          ),
+        }))}
+      />
       <details className="rounded-2xl bg-white ring-1 ring-line" open={services.length === 0}>
         <summary className="cursor-pointer list-none p-4 font-semibold text-accent">+ Lisa uus teenus</summary>
         <div className="border-t border-line p-4">
