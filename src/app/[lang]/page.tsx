@@ -84,7 +84,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       {reviews.length > 0 && (
         <>
           <h2 className="mt-10 mb-4 font-display text-2xl font-semibold text-[#fbf3ec]">{t.reviews}</h2>
-          <div className="no-scrollbar -mx-5 flex snap-x gap-3 overflow-x-auto px-5">
+          {/* scroll-px-5 keeps snapping 20px from the edge, like the services above */}
+          <div className="no-scrollbar -mx-5 flex snap-x scroll-px-5 gap-3 overflow-x-auto px-5">
             {reviews.map((r) => (
               <figure key={r.id} className="w-72 shrink-0 snap-start rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-md">
                 <Stars value={r.rating} />
@@ -92,6 +93,8 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                 <figcaption className="mt-3 text-sm text-white/60">— {r.name_display}</figcaption>
               </figure>
             ))}
+            {/* iPhone ignores right padding in scrolling rows: keep the same gap after the last card */}
+            <span aria-hidden className="w-2 shrink-0" />
           </div>
           <Link href={`/${lang}/reviews`} className="mt-3 inline-block text-sm font-semibold text-accent-light">
             {t.seeAllReviews} →

@@ -2,11 +2,16 @@ import { Stars } from "@/components/Stars";
 import { db, type Review } from "@/lib/db";
 import { site } from "@/lib/site";
 import { fmt } from "@/lib/time";
+import { getTheme } from "@/lib/theme";
 import { CopyLink } from "../settings/CopyLink";
+import { ReviewImage } from "./ReviewImage";
 import { deleteReviewAction, setReviewApproved } from "../../actions";
 
 export default async function AdminReviews() {
-  const reviews = (await db()`select * from reviews order by approved, created_at desc`) as unknown as Review[];
+  const [reviews, theme] = await Promise.all([
+    db()`select * from reviews order by approved, created_at desc` as unknown as Promise<Review[]>,
+    getTheme(),
+  ]);
   const pending = reviews.filter((r) => !r.approved).length;
   return (
     <div className="max-w-2xl">
@@ -18,13 +23,15 @@ export default async function AdminReviews() {
           <CopyLink url={`${site.url}/reviews`} />
         </div>
       </section>
-      <p className="mb-4 text-sm text-muted">
+      <p className="mb-1 text-sm text-muted">
         {pending ? `${pending} ${pending === 1 ? "review ootab" : "reviews ootavad"} kinnitamist. ` : ""}Reviews ilmuvad lehele alles pärast kinnitamist.
       </p>
+      <p className="mb-4 text-sm text-muted">📸 Hoia review&apos;l sõrme, et teha sellest pilt Instagrami või TikToki jaoks.</p>
       {reviews.length === 0 && <p className="py-10 text-center text-muted">Reviews veel pole.</p>}
       <ul className="space-y-2">
         {reviews.map((r) => (
           <li key={r.id} className={`rounded-2xl bg-white p-4 ring-1 ${r.approved ? "ring-line" : "ring-accent/50"}`}>
+            <ReviewImage id={r.id} name={r.name_display} accent={theme.accent}>
             <div className="flex items-center justify-between gap-2">
               <Stars value={r.rating} />
               <span className="flex items-center gap-2 text-xs text-muted">
@@ -36,6 +43,7 @@ export default async function AdminReviews() {
             </div>
             {r.text && <p className="mt-2">{r.text}</p>}
             <p className="mt-1 text-sm text-muted">— {r.name_display}</p>
+            </ReviewImage>
             <div className="mt-3 flex gap-2">
               <form action={setReviewApproved.bind(null, r.id, !r.approved)}>
                 <button className={`rounded-full px-4 py-1.5 text-sm font-semibold ${r.approved ? "ring-1 ring-line" : "bg-ink text-white"}`}>

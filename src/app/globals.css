@@ -414,3 +414,10 @@ body:has([data-dark-page]) .lash-icon {
   font-size: 10px;
   color: var(--color-muted);
 }
+
+/* Admin → Reviews: press and hold a review to make an image (no text selection / iOS menu) */
+.review-pressable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
