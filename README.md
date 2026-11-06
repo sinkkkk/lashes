@@ -63,7 +63,8 @@ The settings are in [`wrangler.jsonc`](wrangler.jsonc).
 The daily job (reminders + review requests) is a Cron Trigger in `wrangler.jsonc` that calls `/api/cron`
 through [`cloudflare-worker.js`](cloudflare-worker.js). It runs at 16:00 UTC (18:00/19:00 in Tallinn).
 
-To try the Cloudflare build on your computer: put the variables in `.dev.vars`, then run `npm run cf:preview`.
+To try the Cloudflare build on your computer: put the variables in `.dev.vars`, set
+`CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` to a local database URL, then run `npm run cf:preview`.
 
 *(The project also still builds on Netlify ([`netlify.toml`](netlify.toml)) and Vercel ([`vercel.json`](vercel.json)).
 Only one host should be live at a time, or the daily emails are sent twice.)*
