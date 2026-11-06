@@ -27,8 +27,15 @@ const MIGRATIONS: { name: string; sql: string }[] = [
       alter table settings add column if not exists tagline_et text;
       alter table settings add column if not exists tagline_en text;`,
   },
+  {
+    name: "004_service_archive",
+    sql: `alter table services add column if not exists archived boolean not null default false;`,
+  },
 ];
-const NEEDED_SETTINGS_COLUMNS = ["accent_color", "bg_darkness", "tagline_et", "tagline_en"];
+const NEEDED_COLUMNS: Record<string, string[]> = {
+  settings: ["accent_color", "bg_darkness", "tagline_et", "tagline_en"],
+  services: ["archived"],
+};
 
 let pending: Promise<void> | null = null;
 
@@ -43,11 +50,12 @@ export function ensureSchema(): Promise<void> {
 async function run() {
   const sql = db();
   const cols = await sql`
-    select column_name from information_schema.columns
-    where table_schema = 'public' and table_name = 'settings'`;
+    select table_name, column_name from information_schema.columns
+    where table_schema = 'public' and table_name in ('settings', 'services')`;
   const [{ assets }] = await sql`select to_regclass('public.assets') is not null as assets`;
-  const have = new Set(cols.map((c) => c.column_name as string));
-  if (assets && NEEDED_SETTINGS_COLUMNS.every((c) => have.has(c))) return;
+  const have = new Set(cols.map((c) => `${c.table_name}.${c.column_name}`));
+  const complete = Object.entries(NEEDED_COLUMNS).every(([table, names]) => names.every((n) => have.has(`${table}.${n}`)));
+  if (assets && complete) return;
 
   for (const m of MIGRATIONS) {
     await sql.unsafe(m.sql);

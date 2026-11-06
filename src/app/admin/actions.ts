@@ -61,14 +61,25 @@ export async function saveServiceAction(form: FormData) {
   revalidatePath("/", "layout");
 }
 
-export async function deleteServiceAction(id: string) {
+/**
+ * Deletes a service. If it has bookings (even old or cancelled ones) it is archived instead:
+ * gone from the admin list and the site, but kept so those bookings still show its name.
+ */
+export async function deleteServiceAction(id: string): Promise<{ ok: boolean }> {
   await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok: false };
+  await ensureSchema();
   const sql = db();
-  const [used] = await sql`select 1 from bookings where service_id = ${id} limit 1`;
-  // Services with booking history are hidden instead of deleted, so history stays intact.
-  if (used) await sql`update services set active = false where id = ${id}`;
-  else await sql`delete from services where id = ${id}`;
+  try {
+    const [used] = await sql`select 1 from bookings where service_id = ${id} limit 1`;
+    if (used) await sql`update services set archived = true, active = false where id = ${id}`;
+    else await sql`delete from services where id = ${id}`;
+  } catch (e) {
+    console.error("deleteService", e);
+    return { ok: false };
+  }
   revalidatePath("/", "layout");
+  return { ok: true };
 }
 
 export async function setReviewApproved(id: string, approved: boolean) {

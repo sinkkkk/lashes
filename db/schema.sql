@@ -103,3 +103,6 @@ alter table assets enable row level security;
 -- Editable landing page text (same as db/migrations/003_tagline.sql)
 alter table settings add column if not exists tagline_et text;
 alter table settings add column if not exists tagline_en text;
+
+-- Archived services (same as db/migrations/004_service_archive.sql)
+alter table services add column if not exists archived boolean not null default false;

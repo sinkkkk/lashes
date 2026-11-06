@@ -296,3 +296,15 @@ body:has(.bottom-bar) footer {
   margin: 0 !important;
   z-index: 3 !important;
 }
+
+/* Admin: use a darker, always-readable version of the accent colour for text, buttons and
+   booking blocks (a bright pink chosen for the customer site would be hard to read here).
+   The colour is capped at a medium lightness, so already-dark colours stay as they are. */
+.admin-theme {
+  --color-accent: color-mix(in oklab, var(--accent, #a65a2e) 68%, black);
+}
+@supports (color: oklch(from red l c h)) {
+  .admin-theme {
+    --color-accent: oklch(from var(--accent, #a65a2e) min(l, 0.5) c h);
+  }
+}

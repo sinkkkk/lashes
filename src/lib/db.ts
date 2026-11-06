@@ -77,11 +77,12 @@ function toService(r: Record<string, unknown>): Service {
   return { ...(r as unknown as Service), price_eur: Number(r.price_eur) };
 }
 
+/** Customer site: active services. Admin (onlyActive = false): everything except deleted (archived) ones. */
 export async function getServices(onlyActive = true): Promise<Service[]> {
   const sql = db();
   const rows = onlyActive
     ? await sql`select * from services where active order by sort, name_et`
-    : await sql`select * from services order by sort, name_et`;
+    : await sql`select * from services where not coalesce((to_jsonb(services) ->> 'archived')::boolean, false) order by sort, name_et`;
   return rows.map(toService);
 }
 

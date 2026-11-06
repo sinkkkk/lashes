@@ -1,8 +1,14 @@
-import { getServices, type Service } from "@/lib/db";
-import { deleteServiceAction, saveServiceAction } from "../../actions";
+import { db, getServices, type Service } from "@/lib/db";
+import { saveServiceAction } from "../../actions";
+import { DeleteServiceButton } from "./DeleteServiceButton";
 
 export default async function ServicesPage() {
-  const services = await getServices(false);
+  const [services, counts] = await Promise.all([
+    getServices(false),
+    db()`select service_id, count(*)::int as n from bookings
+         where status = 'confirmed' and starts_at > now() group by service_id`,
+  ]);
+  const upcoming = new Map(counts.map((c) => [c.service_id as string, c.n as number]));
   return (
     <div className="max-w-2xl space-y-3">
       <p className="text-sm text-muted">
@@ -22,9 +28,7 @@ export default async function ServicesPage() {
           </summary>
           <div className="border-t border-line p-4">
             <ServiceForm s={s} />
-            <form action={deleteServiceAction.bind(null, s.id)} className="mt-3">
-              <button className="text-sm text-accent">Kustuta teenus</button>
-            </form>
+            <DeleteServiceButton id={s.id} name={s.name_et} upcoming={upcoming.get(s.id) ?? 0} />
           </div>
         </details>
       ))}
