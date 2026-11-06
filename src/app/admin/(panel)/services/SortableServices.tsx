@@ -88,7 +88,7 @@ export function SortableServices({ items }: { items: ServiceItem[] }) {
         </SortableContext>
       </DndContext>
       {saved && (
-        <div role="status" className="toast fixed inset-x-0 bottom-24 z-40 mx-auto w-fit rounded-full bg-ink px-5 py-2.5 text-sm text-white shadow-lg md:bottom-8">
+        <div role="status" className="toast fixed inset-x-0 bottom-[calc(6rem+var(--host-badge,0px))] z-40 mx-auto w-fit rounded-full bg-ink px-5 py-2.5 text-sm text-white shadow-lg md:bottom-[calc(2rem+var(--host-badge,0px))]">
           {saved === "ok" ? "Järjekord salvestatud ✓" : "Salvestamine ebaõnnestus"}
         </div>
       )}

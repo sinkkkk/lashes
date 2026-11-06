@@ -426,7 +426,7 @@ export function AdminCalendar() {
       </div>
 
       {toast && (
-        <div key={toast.key} role="status" className="toast fixed inset-x-0 bottom-24 z-40 mx-auto flex w-fit max-w-[92vw] items-center gap-4 rounded-full bg-ink py-2.5 pr-2.5 pl-5 text-sm text-white shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] md:bottom-8">
+        <div key={toast.key} role="status" className="toast fixed inset-x-0 bottom-[calc(6rem+var(--host-badge,0px))] z-40 mx-auto flex w-fit max-w-[92vw] items-center gap-4 rounded-full bg-ink py-2.5 pr-2.5 pl-5 text-sm text-white shadow-[0_12px_30px_-10px_rgb(0_0_0/0.45)] md:bottom-[calc(2rem+var(--host-badge,0px))]">
           <span className={toast.error ? "text-[#ffb4a8]" : ""}>{toast.text}</span>
           {toast.action ? (
             <button
@@ -555,7 +555,7 @@ function Sheet({ onClose, children }: { onClose: () => void; children: React.Rea
       <div
         role="dialog"
         aria-modal="true"
-        className="sheet w-full rounded-t-3xl bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:max-w-md md:rounded-3xl"
+        className="sheet w-full rounded-t-3xl bg-white p-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+var(--host-badge,0px))] md:max-w-md md:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto -mt-2 mb-4 h-1.5 w-10 rounded-full bg-line md:hidden" aria-hidden />

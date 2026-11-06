@@ -248,7 +248,7 @@ body {
   }
   /* Full-width strip behind the bottom button that fades out smoothly */
   .bottom-bar {
-    @apply fixed inset-x-0 bottom-0 z-20 pt-16 pb-[max(1.25rem,env(safe-area-inset-bottom))];
+    @apply fixed inset-x-0 bottom-0 z-20 pt-16 pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+var(--host-badge,0px))];
   }
   .fade-dark {
     background: linear-gradient(
@@ -280,7 +280,16 @@ body {
 
 /* Pages with a bottom button: keep the footer links above it (outside @layer so it wins). */
 body:has(.bottom-bar) footer {
-  padding-bottom: 10.5rem;
+  padding-bottom: calc(10.5rem + var(--host-badge, 0px));
+}
+
+/*
+ * Netlify's free plan shows a "Powered by Netlify" badge (iframe#nl-badge-frame, 64px high, fixed in the
+ * bottom-right corner). It must stay visible, so instead of covering it, everything pinned to the bottom
+ * of the screen moves up by its height while it is there. If the badge goes away, so does the gap.
+ */
+html:has(#nl-badge-frame) {
+  --host-badge: 64px;
 }
 
 /* Admin calendar: time blocks fill the column; bookings sit on top of them at almost full width
