@@ -4,9 +4,11 @@ import { sendReminder, sendReviewRequest } from "@/lib/notify";
 import { dayKey, startOfDayTallinn } from "@/lib/time";
 
 /**
- * Runs once a day (see vercel.json; Vercel's free plan allows daily jobs).
+ * Runs once a day (Cloudflare Cron Trigger in wrangler.jsonc, via cloudflare-worker.js).
  * - Reminds everyone who has an appointment tomorrow.
  * - Asks for a review from everyone whose appointment ended in the last 7 days.
+ * Each booking is claimed (marked as sent) before its email goes out, so even if the job runs twice
+ * at the same moment nobody gets the same email twice.
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -20,24 +22,27 @@ export async function GET(req: Request) {
   const dayAfterStart = startOfDayTallinn(dayKey(new Date(tomorrowStart.getTime() + 36 * 3600_000)));
 
   const reminders = await sql`
-    select b.*, row_to_json(s) as service from bookings b join services s on s.id = b.service_id
-    where b.status = 'confirmed' and b.reminder_sent_at is null
-      and b.starts_at >= ${tomorrowStart}::timestamptz and b.starts_at < ${dayAfterStart}::timestamptz`;
+    with claimed as (
+      update bookings set reminder_sent_at = now()
+      where status = 'confirmed' and reminder_sent_at is null
+        and starts_at >= ${tomorrowStart}::timestamptz and starts_at < ${dayAfterStart}::timestamptz
+      returning *
+    )
+    select b.*, row_to_json(s) as service from claimed b join services s on s.id = b.service_id`;
   for (const r of reminders) {
     const s = r.service as Service;
     await sendReminder(r as unknown as Booking, { ...s, price_eur: Number(s.price_eur) });
-    await sql`update bookings set reminder_sent_at = now() where id = ${r.id}`;
   }
 
   const reviews = await sql`
-    select b.* from bookings b
+    update bookings b set review_requested_at = now()
     where b.status = 'confirmed' and b.review_requested_at is null
       and b.ends_at < now() - interval '1 hour' and b.ends_at > now() - interval '7 days'
       and not exists (select 1 from reviews r where r.booking_id = b.id)
-      and not exists (select 1 from email_optouts o where o.email = lower(b.email))`;
+      and not exists (select 1 from email_optouts o where o.email = lower(b.email))
+    returning b.*`;
   for (const r of reviews) {
     await sendReviewRequest(r as unknown as Booking);
-    await sql`update bookings set review_requested_at = now() where id = ${r.id}`;
   }
 
   return Response.json({ reminders: reminders.length, reviewRequests: reviews.length });
