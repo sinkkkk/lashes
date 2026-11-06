@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { endSession, passwordMatches, requireAdmin, startSession } from "@/lib/auth";
 import { db, type Booking } from "@/lib/db";
+import { cleanColor } from "@/lib/colors";
 import { ensureSchema } from "@/lib/migrate";
 import { onBookingCancelled } from "@/lib/notify";
 
@@ -53,8 +54,10 @@ export async function saveServiceAction(form: FormData) {
     photo_url: str(form, "photo_url"),
     sort: Math.round(num(form, "sort") || 0),
     active: form.get("active") === "on",
+    color: cleanColor(form.get("color")),
   };
   if (!v.name_et || !(v.duration_min >= 15) || !(v.price_eur >= 0)) return;
+  await ensureSchema();
   const sql = db();
   if (id) await sql`update services set ${sql(v)} where id = ${id}`;
   else await sql`insert into services ${sql(v)}`;

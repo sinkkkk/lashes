@@ -31,10 +31,14 @@ const MIGRATIONS: { name: string; sql: string }[] = [
     name: "004_service_archive",
     sql: `alter table services add column if not exists archived boolean not null default false;`,
   },
+  {
+    name: "005_service_color",
+    sql: `alter table services add column if not exists color text;`,
+  },
 ];
 const NEEDED_COLUMNS: Record<string, string[]> = {
   settings: ["accent_color", "bg_darkness", "tagline_et", "tagline_en"],
-  services: ["archived"],
+  services: ["archived", "color"],
 };
 
 let pending: Promise<void> | null = null;

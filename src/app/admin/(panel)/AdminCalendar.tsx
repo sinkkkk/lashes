@@ -15,6 +15,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { cleanColor, readableText } from "@/lib/colors";
 import { cancelBookingByOwner, deleteBookingAction } from "../actions";
 
 /** The name of the owner's open time blocks, shown in the calendar. */
@@ -30,6 +31,8 @@ type BookingInfo = {
   note: string;
   service: string;
   price_eur: string;
+  /** The service's colour (lash type), or null for the accent colour */
+  color: string | null;
 };
 
 type Saved = { id: string; starts_at: string; ends_at: string };
@@ -92,6 +95,8 @@ export function AdminCalendar() {
         end: b.ends_at,
         title: b.customer_name,
         classNames: ["booking-block"],
+        // Colour-coded by service (lash type); falls back to the accent colour.
+        ...(cleanColor(b.color) ? { backgroundColor: cleanColor(b.color)!, borderColor: cleanColor(b.color)! } : {}),
         editable: false,
         extendedProps: { kind: "booking", booking: b },
       })),
@@ -232,8 +237,9 @@ export function AdminCalendar() {
     }
     if (kind === "booking") {
       const b = arg.event.extendedProps.booking as BookingInfo;
+      const color = cleanColor(b.color);
       return (
-        <div className="ev">
+        <div className="ev" style={color ? { color: readableText(color) } : undefined}>
           <span className="ev-time">{arg.timeText}</span>
           <span className="ev-title">{b.customer_name}</span>
           <span className="ev-sub">{b.service}</span>
@@ -390,8 +396,18 @@ export function AdminCalendar() {
             {date(open.starts_at)} · {range(open.starts_at, open.ends_at)}
           </p>
           <h2 className="mt-1 font-display text-2xl font-semibold">{open.customer_name}</h2>
-          <p className="font-medium">
-            {open.service} · {Number(open.price_eur)} €
+          <p className="mt-1 flex flex-wrap items-center gap-2 font-medium">
+            <span
+              className="rounded-full px-2.5 py-0.5 text-sm font-semibold"
+              style={
+                cleanColor(open.color)
+                  ? { background: cleanColor(open.color)!, color: readableText(cleanColor(open.color)!) }
+                  : { background: "var(--color-accent)", color: "#fff" }
+              }
+            >
+              {open.service}
+            </span>
+            <span>{Number(open.price_eur)} €</span>
           </p>
           {open.note && <p className="mt-3 rounded-xl bg-sand p-3 text-sm">📝 {open.note}</p>}
           <div className="mt-5 grid grid-cols-2 gap-2">

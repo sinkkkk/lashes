@@ -13,7 +13,7 @@ export async function GET(req: Request) {
     sql`select id, starts_at, ends_at from availability
         where ends_at > ${start}::timestamptz and starts_at < ${end}::timestamptz`,
     sql`select b.id, b.starts_at, b.ends_at, b.customer_name, b.phone, b.email, b.note,
-               s.name_et as service, s.price_eur
+               s.name_et as service, s.price_eur, to_jsonb(s) ->> 'color' as color
         from bookings b join services s on s.id = b.service_id
         where b.status = 'confirmed' and b.ends_at > ${start}::timestamptz and b.starts_at < ${end}::timestamptz`,
   ]);

@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { display, inter } from "../fonts";
 import { connection } from "next/server";
+import { site } from "@/lib/site";
 import { getTheme, themeCss } from "@/lib/theme";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Admin · Liisu Lashes",
+  title: `Admin · ${site.name}`,
   robots: { index: false },
-  // Home-screen app: lash icon, name "Liisu Admin", opens full screen without Safari's bars.
+  // Home-screen app: lash icon, short name under the icon, opens full screen without Safari's bars.
   manifest: "/admin/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Liisu Admin", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Hille Liis", statusBarStyle: "default" },
 };
 // viewportFit "cover" lets the page know where the iPhone's home bar and notch are, so the bottom
 // tab bar can stay clear of them (env(safe-area-inset-…)).

@@ -35,6 +35,8 @@ export type Service = {
   photo_url: string;
   sort: number;
   active: boolean;
+  /** Colour for colour-coding in the admin; null = the accent colour */
+  color: string | null;
 };
 
 export type Booking = {
@@ -74,7 +76,7 @@ export type Review = {
 };
 
 function toService(r: Record<string, unknown>): Service {
-  return { ...(r as unknown as Service), price_eur: Number(r.price_eur) };
+  return { ...(r as unknown as Service), price_eur: Number(r.price_eur), color: (r.color as string | null) ?? null };
 }
 
 /** Customer site: active services. Admin (onlyActive = false): everything except deleted (archived) ones. */

@@ -1,4 +1,4 @@
-# Liisu Lashes: booking website
+# Lashes by Hille Liis: booking website
 
 A mobile-first booking site for a one-person lash studio.
 
@@ -41,7 +41,7 @@ FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
 ### 2. Email: Resend
 1. Create an account at [resend.com](https://resend.com) → **API Keys** → create one → `RESEND_API_KEY`.
 2. **Domains** → add your domain and add the DNS records it shows. Then set
-   `EMAIL_FROM=Liisu Lashes <broneering@yourdomain.ee>`.
+   `EMAIL_FROM=Lashes by Hille Liis <broneering@yourdomain.ee>`.
    (Until the domain is verified, Resend only lets you send to your own email.)
 
 ### 3. Hosting: Vercel

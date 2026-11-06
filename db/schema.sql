@@ -106,3 +106,6 @@ alter table settings add column if not exists tagline_en text;
 
 -- Archived services (same as db/migrations/004_service_archive.sql)
 alter table services add column if not exists archived boolean not null default false;
+
+-- Service colours (same as db/migrations/005_service_color.sql)
+alter table services add column if not exists color text;

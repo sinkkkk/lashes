@@ -11,7 +11,7 @@ const ev = (n: number, extra = {}) => ({
 
 describe("makeCalendar (owner's feed)", () => {
   const ics = makeCalendar([ev(1, { description: "Tel: +372 5123\nMärkus: esimene kord\; allergia, liim" }), ev(2)], {
-    name: "Liisu Lashes – broneeringud",
+    name: "Lashes by Hille Liis – broneeringud",
     feed: true,
   });
 
@@ -23,7 +23,7 @@ describe("makeCalendar (owner's feed)", () => {
   });
 
   it("has the subscription headers Apple Calendar reads", () => {
-    expect(ics).toContain("X-WR-CALNAME:Liisu Lashes – broneeringud");
+    expect(ics).toContain("X-WR-CALNAME:Lashes by Hille Liis – broneeringud");
     expect(ics).toContain("REFRESH-INTERVAL;VALUE=DURATION:PT5M");
     expect(ics).toContain("X-PUBLISHED-TTL:PT5M");
   });

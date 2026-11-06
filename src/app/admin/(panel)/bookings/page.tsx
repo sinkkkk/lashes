@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cleanColor } from "@/lib/colors";
 import { db } from "@/lib/db";
 import { dayKey, fmt } from "@/lib/time";
 import { OwnerCancel } from "./OwnerCancel";
@@ -15,6 +16,7 @@ type Row = {
   status: string;
   service: string;
   price_eur: string;
+  color: string | null;
   created_at: Date;
 };
 
@@ -22,9 +24,9 @@ export default async function BookingsPage({ searchParams }: PageProps<"/admin/b
   const { show } = await searchParams;
   const past = show === "past";
   const rows = (past
-    ? await db()`select b.*, s.name_et as service, s.price_eur from bookings b join services s on s.id = b.service_id
+    ? await db()`select b.*, s.name_et as service, s.price_eur, to_jsonb(s) ->> 'color' as color from bookings b join services s on s.id = b.service_id
                  where b.starts_at < now() order by b.starts_at desc limit 200`
-    : await db()`select b.*, s.name_et as service, s.price_eur from bookings b join services s on s.id = b.service_id
+    : await db()`select b.*, s.name_et as service, s.price_eur, to_jsonb(s) ->> 'color' as color from bookings b join services s on s.id = b.service_id
                  where b.ends_at >= now() and b.status = 'confirmed' order by b.starts_at`) as unknown as Row[];
 
   const groups = new Map<string, Row[]>();
@@ -56,7 +58,11 @@ export default async function BookingsPage({ searchParams }: PageProps<"/admin/b
             </h2>
             <ul className="space-y-2">
               {list.map((b) => (
-                <li key={b.id} className={`rounded-2xl bg-white p-4 ring-1 ring-line ${b.status === "cancelled" ? "opacity-50" : ""}`}>
+                <li
+                  key={b.id}
+                  className={`rounded-2xl bg-white p-4 ring-1 ring-line ${b.status === "cancelled" ? "opacity-50" : ""}`}
+                  style={{ borderLeft: `5px solid ${cleanColor(b.color) ?? "var(--color-accent)"}` }}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold">

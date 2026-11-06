@@ -19,7 +19,7 @@ export async function sendSms(to: string, text: string) {
     headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       to: normalizePhone(to),
-      messages: [{ channel: "sms", sender: process.env.MESSENTE_SENDER || "LiisuLashes", text }],
+      messages: [{ channel: "sms", sender: process.env.MESSENTE_SENDER || "HilleLiis", text }],
     }),
   });
   if (!res.ok) console.error("Messente error", res.status, await res.text());

@@ -1,9 +1,11 @@
+import { site } from "@/lib/site";
+
 /** Makes /admin installable as a home-screen app with the lash icon. */
 export function GET() {
   return Response.json(
     {
-      name: "Liisu Lashes Admin",
-      short_name: "Liisu Admin",
+      name: `${site.name} – Admin`,
+      short_name: "Hille Liis",
       start_url: "/admin",
       scope: "/admin",
       display: "standalone",

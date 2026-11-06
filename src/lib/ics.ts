@@ -57,7 +57,7 @@ function eventLines(e: IcsEvent): string[] {
 
 /** A whole calendar. With `feed`, calendar apps that subscribe to it refresh every 5 minutes. */
 export function makeCalendar(events: IcsEvent[], opts: { name?: string; feed?: boolean } = {}) {
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Liisu Lashes//Booking//ET", "CALSCALE:GREGORIAN", `METHOD:PUBLISH`];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Lashes by Hille Liis//Booking//ET", "CALSCALE:GREGORIAN", `METHOD:PUBLISH`];
   if (opts.name) lines.push(`X-WR-CALNAME:${esc(opts.name)}`);
   if (opts.feed) lines.push("X-WR-TIMEZONE:Europe/Tallinn", "REFRESH-INTERVAL;VALUE=DURATION:PT5M", "X-PUBLISHED-TTL:PT5M");
   for (const e of events) lines.push(...eventLines(e));

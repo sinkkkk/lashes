@@ -1,3 +1,5 @@
+import { site } from "./site";
+
 type Attachment = { filename: string; content: string /* plain text */ };
 
 /**
@@ -6,7 +8,7 @@ type Attachment = { filename: string; content: string /* plain text */ };
  */
 export async function sendEmail(msg: { to: string; subject: string; html: string; attachments?: Attachment[] }) {
   const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || "Liisu Lashes <onboarding@resend.dev>";
+  const from = process.env.EMAIL_FROM || `${site.name} <onboarding@resend.dev>`;
   if (!msg.to) return;
   if (!key) {
     console.log(`[email not sent: no RESEND_API_KEY] to=${msg.to} subject="${msg.subject}"`);
