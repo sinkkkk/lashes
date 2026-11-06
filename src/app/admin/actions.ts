@@ -217,3 +217,17 @@ export async function sendTestPushAction(): Promise<boolean> {
     click: `${(await import("@/lib/site")).site.url}/admin`,
   });
 }
+
+/** Colour of the lash icons on the landing page (null = automatic). */
+export async function saveIconColorAction(color: string | null): Promise<LookResult> {
+  await requireAdmin();
+  await ensureSchema();
+  try {
+    await db()`update settings set icon_color = ${cleanColor(color)} where id = 1`;
+  } catch (e) {
+    if (needsMigration(e)) return { ok: false, error: "migration" };
+    throw e;
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}

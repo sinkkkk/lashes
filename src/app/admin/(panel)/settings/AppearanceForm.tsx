@@ -2,7 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { resetBackgroundAction, saveAppearanceAction, saveTaglineAction, uploadBackgroundAction } from "../../actions";
+import { LashMark } from "@/components/LashMark";
+import { resetBackgroundAction, saveAppearanceAction, saveIconColorAction, saveTaglineAction, uploadBackgroundAction } from "../../actions";
+
+/** Ready colours for the lash icons on the dark landing page. */
+const ICON_PRESETS = [
+  { name: "Valge", hex: "#ffffff" },
+  { name: "Kreem", hex: "#fbf1e6" },
+  { name: "Heleroosa", hex: "#ffd3e4" },
+  { name: "Roosa", hex: "#ff9cc4" },
+  { name: "Kuld", hex: "#f2cd86" },
+  { name: "Lilla", hex: "#dccbf7" },
+];
 
 type Preset = { name: string; hex: string };
 
@@ -46,6 +57,7 @@ export function AppearanceForm(props: {
   isDefaultBg: boolean;
   presets: Preset[];
   tagline: Tagline;
+  iconColor: string | null;
   defaultTagline: { et: string; en: string };
 }) {
   const router = useRouter();
@@ -58,6 +70,8 @@ export function AppearanceForm(props: {
   const dirty = accent !== props.accent || darkness !== props.darkness;
   const [taglineEt, setTaglineEt] = useState(props.tagline.et ?? "");
   const [taglineEn, setTaglineEn] = useState(props.tagline.en ?? "");
+  const [iconColor, setIconColor] = useState<string | null>(props.iconColor);
+  const iconDirty = iconColor !== props.iconColor;
   const taglineDirty = taglineEt !== (props.tagline.et ?? "") || taglineEn !== (props.tagline.en ?? "");
 
   const show = (r: { ok: true } | { ok: false; error: keyof typeof MESSAGES }, okText: string) => {
@@ -104,6 +118,7 @@ export function AppearanceForm(props: {
             <p className="line-clamp-3 font-display text-lg leading-tight text-[#fbf3ec]">{taglineEt.trim() || props.defaultTagline.et}</p>
             <p className="mt-1 text-xs text-accent-light">★★★★★</p>
             <div className="mt-2 rounded-lg bg-white/10 px-2 py-1.5 text-[11px] text-white ring-1 ring-white/15">
+              <LashMark className="mr-1.5 inline-block h-2 w-4 align-middle" style={{ color: iconColor ?? "var(--color-accent-light)" }} />
               Volüümripsmed <span className="float-right text-accent-light">65 €</span>
             </div>
             <div className="mt-2 rounded-full bg-accent-light py-1.5 text-center text-xs font-semibold text-ink">Broneeri aeg</div>
@@ -160,6 +175,43 @@ export function AppearanceForm(props: {
         className="mt-4 w-full rounded-full bg-ink py-3 font-semibold text-white disabled:bg-line disabled:text-muted"
       >
         {pending ? "…" : "Salvesta värv ja tumedus"}
+      </button>
+
+      {/* Lash icon colour on the landing page */}
+      <p className="mt-6 mb-2 text-xs font-medium text-muted">Ripsmeikoonide värv avalehel (teenustel ilma pildita)</p>
+      <div className="flex flex-wrap items-center gap-2">
+        {ICON_PRESETS.map((p) => (
+          <button
+            key={p.hex}
+            type="button"
+            onClick={() => setIconColor(p.hex)}
+            title={p.name}
+            aria-label={p.name}
+            aria-pressed={iconColor === p.hex}
+            className={`flex h-10 w-10 items-center justify-center rounded-full bg-[#2a1c15] ring-offset-2 ${iconColor === p.hex ? "ring-2 ring-ink" : "ring-1 ring-line"}`}
+          >
+            <LashMark className="h-3 w-6" style={{ color: p.hex }} />
+          </button>
+        ))}
+        <label className="flex h-10 items-center gap-2 rounded-full px-3 text-sm ring-1 ring-line">
+          <input type="color" value={iconColor ?? "#ffd3e4"} onChange={(e) => setIconColor(e.target.value)} className="h-6 w-6 cursor-pointer rounded-full border-0 bg-transparent p-0" />
+          Muu
+        </label>
+        <button
+          type="button"
+          onClick={() => setIconColor(null)}
+          className={`h-10 rounded-full px-3 text-sm ring-1 ${iconColor === null ? "bg-ink text-white ring-ink" : "ring-line"}`}
+        >
+          Automaatne
+        </button>
+      </div>
+      <button
+        type="button"
+        disabled={!iconDirty || pending}
+        onClick={() => start(async () => show(await saveIconColorAction(iconColor), "Ikoonide värv salvestatud!"))}
+        className="mt-3 w-full rounded-full bg-ink py-3 font-semibold text-white disabled:bg-line disabled:text-muted"
+      >
+        {pending ? "…" : "Salvesta ikoonide värv"}
       </button>
 
       {/* Landing page text */}

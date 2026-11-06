@@ -35,9 +35,13 @@ const MIGRATIONS: { name: string; sql: string }[] = [
     name: "005_service_color",
     sql: `alter table services add column if not exists color text;`,
   },
+  {
+    name: "006_icon_color",
+    sql: `alter table settings add column if not exists icon_color text;`,
+  },
 ];
 const NEEDED_COLUMNS: Record<string, string[]> = {
-  settings: ["accent_color", "bg_darkness", "tagline_et", "tagline_en"],
+  settings: ["accent_color", "bg_darkness", "tagline_et", "tagline_en", "icon_color"],
   services: ["archived", "color"],
 };
 

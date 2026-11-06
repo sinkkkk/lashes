@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { cleanColor } from "./colors";
 import { db } from "./db";
 import { ensureSchema } from "./migrate";
 
@@ -9,6 +10,8 @@ export type Theme = {
   bgUrl: string;
   /** Landing page text set in admin; null = use the built-in text */
   tagline: { et: string | null; en: string | null };
+  /** Colour of the lash icons on the landing page's service cards; null = automatic */
+  iconColor: string | null;
 };
 
 export const DEFAULT_ACCENT = "#a65a2e"; // copper
@@ -43,12 +46,14 @@ export const getTheme = cache(async function getTheme(): Promise<Theme> {
   let bgDarkness = DEFAULT_DARKNESS;
   let bgUrl = DEFAULT_BG;
   const tagline: Theme["tagline"] = { et: null, en: null };
+  let iconColor: string | null = null;
   await ensureSchema();
   try {
     const [s] = await sql`select * from settings where id = 1`;
     accent = cleanAccent(s?.accent_color);
     if (s?.bg_darkness != null) bgDarkness = cleanDarkness(s.bg_darkness);
     tagline.et = typeof s?.tagline_et === "string" && s.tagline_et.trim() ? s.tagline_et.trim() : null;
+    iconColor = cleanColor(s?.icon_color);
     tagline.en = typeof s?.tagline_en === "string" && s.tagline_en.trim() ? s.tagline_en.trim() : null;
   } catch (e) {
     console.error("theme: settings", e);
@@ -59,10 +64,11 @@ export const getTheme = cache(async function getTheme(): Promise<Theme> {
   } catch {
     // assets table not created yet (db/migrations/002_appearance.sql): use the built-in photo
   }
-  return { accent, bgDarkness, bgUrl, tagline };
+  return { accent, bgDarkness, bgUrl, tagline, iconColor };
 });
 
 /** CSS that sets the accent colour for the whole page. */
-export function themeCss(t: Pick<Theme, "accent">) {
-  return `:root{--accent:${cleanAccent(t.accent)}}`;
+export function themeCss(t: Pick<Theme, "accent"> & { iconColor?: string | null }) {
+  const icon = cleanColor(t.iconColor);
+  return `:root{--accent:${cleanAccent(t.accent)}${icon ? `;--lash-icon:${icon}` : ""}}`;
 }

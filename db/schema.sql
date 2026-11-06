@@ -109,3 +109,6 @@ alter table services add column if not exists archived boolean not null default 
 
 -- Service colours (same as db/migrations/005_service_color.sql)
 alter table services add column if not exists color text;
+
+-- Landing page lash icon colour (same as db/migrations/006_icon_color.sql)
+alter table settings add column if not exists icon_color text;

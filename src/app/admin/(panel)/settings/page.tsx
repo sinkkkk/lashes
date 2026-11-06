@@ -27,6 +27,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
         isDefaultBg={theme.bgUrl === DEFAULT_BG}
         presets={ACCENT_PRESETS}
         tagline={theme.tagline}
+        iconColor={theme.iconColor}
         defaultTagline={{ et: dict.et.tagline, en: dict.en.tagline }}
       />
 

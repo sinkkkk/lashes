@@ -21,3 +21,11 @@ describe("theme helpers", () => {
     expect(themeCss({ accent: "</style><script>alert(1)</script>" })).toBe(`:root{--accent:${DEFAULT_ACCENT}}`);
   });
 });
+
+describe("themeCss icon colour", () => {
+  it("adds the lash icon colour only when it is a valid colour", () => {
+    expect(themeCss({ accent: "#a65a2e", iconColor: "#FFE4EE" })).toBe(":root{--accent:#a65a2e;--lash-icon:#ffe4ee}");
+    expect(themeCss({ accent: "#a65a2e", iconColor: null })).toBe(":root{--accent:#a65a2e}");
+    expect(themeCss({ accent: "#a65a2e", iconColor: "red;}x{" })).toBe(":root{--accent:#a65a2e}");
+  });
+});

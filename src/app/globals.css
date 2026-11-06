@@ -323,3 +323,12 @@ body:has(.bottom-bar) footer {
   --color-ink: color-mix(in oklab, var(--accent, #a65a2e) 14%, #24170f);
   background: var(--color-cream);
 }
+
+/* Lash icon on service cards without a photo. On the dark landing page its colour can be set in
+   /admin → Välimus (--lash-icon); otherwise it is a shade of the accent colour. */
+.lash-icon {
+  color: color-mix(in oklab, var(--color-accent) 70%, transparent);
+}
+body:has([data-dark-page]) .lash-icon {
+  color: var(--lash-icon, var(--color-accent-light));
+}
