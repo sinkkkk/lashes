@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Stars } from "@/components/Stars";
+import { PublicReviewForm } from "./PublicReviewForm";
 import { dict, isLang, type Lang } from "@/lib/i18n";
 import { getApprovedReviews, getRatingSummary } from "@/lib/reviews";
 import { fmt } from "@/lib/time";
@@ -28,6 +29,7 @@ export default async function ReviewsPage({ params }: PageProps<"/[lang]/reviews
           </div>
         </div>
       )}
+      <PublicReviewForm lang={lang} />
       {reviews.length === 0 && <p className="mt-6 text-muted">{t.noReviewsYet}</p>}
       <ul className="mt-6 space-y-3">
         {reviews.map((r) => (

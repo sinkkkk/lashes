@@ -9,11 +9,11 @@ const et = {
   tagline: "Ripsmepikendused, mis näevad loomulikud välja ja püsivad kaua.",
   bookNow: "Broneeri aeg",
   services: "Teenused",
-  reviews: "Arvustused",
+  reviews: "Reviews",
   terms: "Tingimused",
-  noReviewsYet: "Arvustusi veel pole.",
-  seeAllReviews: "Kõik arvustused",
-  basedOn: (n: number) => `${n} arvustuse põhjal`,
+  noReviewsYet: "Reviews veel pole.",
+  seeAllReviews: "Vaata kõiki",
+  basedOn: (n: number) => `${n} ${n === 1 ? "review" : "reviews"}`,
   // booking flow
   stepService: "Vali teenus",
   stepTime: "Vali aeg",
@@ -56,9 +56,11 @@ const et = {
   yourRating: "Sinu hinnang",
   reviewText: "Paar sõna (valikuline)",
   displayName: "Nimi, mida näidata",
-  sendReview: "Saada arvustus",
-  thanksReview: "Aitäh! Arvustus ilmub lehele peale ülevaatust.",
-  alreadyReviewed: "Selle külastuse kohta on arvustus juba olemas. Aitäh!",
+  sendReview: "Saada",
+  thanksReview: "Aitäh! Review ilmub lehele peale ülevaatust.",
+  alreadyReviewed: "Selle külastuse kohta on review juba olemas. Aitäh!",
+  shareExperience: "Jaga oma kogemust",
+  shareIntro: "Kuidas ripsmed meeldisid? Sinu review aitab teistel otsustada.",
 };
 
 type Dict = typeof et;
@@ -114,6 +116,8 @@ const en: Dict = {
   sendReview: "Send review",
   thanksReview: "Thank you! Your review will appear after a quick check.",
   alreadyReviewed: "This visit already has a review. Thank you!",
+  shareExperience: "Share your experience",
+  shareIntro: "How did you like your lashes? Your review helps others decide.",
 };
 
 export const dict: Record<Lang, Dict> = { et, en };

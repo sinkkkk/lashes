@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
   // Room for a background photo uploaded from /admin (it is shrunk in the browser first).
   experimental: { serverActions: { bodySizeLimit: "4mb" } },
   async redirects() {
-    return [{ source: "/", destination: "/et", permanent: false }];
+    return [
+      { source: "/", destination: "/et", permanent: false },
+      // Short public link for leaving a review: hilleliis.ee/reviews
+      { source: "/reviews", destination: "/et/reviews", permanent: false },
+    ];
   },
   turbopack: {
     rules: {

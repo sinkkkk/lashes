@@ -195,7 +195,7 @@ export async function resetBackgroundAction(): Promise<LookResult> {
 
 /**
  * Removes a booking for good (test or spam bookings). No emails are sent.
- * Reviews linked to it are kept (they can be removed in Arvustused).
+ * Reviews linked to it are kept (they can be removed in Reviews).
  */
 export async function deleteBookingAction(id: string) {
   await requireAdmin();
