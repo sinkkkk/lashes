@@ -15,5 +15,7 @@
   "placement": { "mode": "smart" },
   // Daily reminders and review requests at 16:00 UTC (18:00 / 19:00 in Tallinn)
   "triggers": { "crons": ["0 16 * * *"] },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Keep the variables set in the Cloudflare dashboard on every deploy
+  "keep_vars": true
 }
