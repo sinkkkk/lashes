@@ -39,24 +39,53 @@ body {
 
 /* Admin calendar (FullCalendar) */
 .fc {
-  --fc-border-color: var(--color-line);
-  --fc-today-bg-color: #fdf3ee;
-  --fc-now-indicator-color: var(--color-accent);
+  --fc-border-color: #efe8e3;
+  --fc-today-bg-color: color-mix(in oklab, var(--color-accent) 5%, white);
+  --fc-now-indicator-color: #e5322d; /* always red, whatever the accent colour */
+  --free: #3f7a4c;
+  --free-bg: #e7f2e9;
   font-size: 13px;
 }
 .fc .fc-timegrid-slot {
   height: 2.2em;
 }
+@media (max-width: 767px) {
+  .fc .fc-timegrid-slot {
+    height: 2.7em; /* easier to hit 15-minute steps with a finger */
+  }
+}
+.fc .fc-timegrid-slot-minor {
+  border-top-style: dotted;
+}
+.fc .fc-timegrid-slot-label {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.fc .fc-col-header-cell-cushion {
+  padding: 6px 2px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
 .fc .fc-toolbar-title {
   font-size: 1.05rem;
   font-weight: 600;
+  text-transform: capitalize;
 }
 .fc .fc-button {
   background: #fff;
   color: var(--color-ink);
   border: 1px solid var(--color-line);
+  border-radius: 999px !important;
   text-transform: none;
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.8rem;
+  box-shadow: none !important;
+  transition: background 0.15s, transform 0.1s;
+}
+.fc .fc-button-group {
+  gap: 4px;
+}
+.fc .fc-button:active {
+  transform: scale(0.96);
 }
 .fc .fc-button-primary:not(:disabled).fc-button-active,
 .fc .fc-button-primary:not(:disabled):active {
@@ -64,21 +93,146 @@ body {
   color: #fff;
   border-color: var(--color-ink);
 }
+.fc .fc-timegrid-now-indicator-line {
+  border-width: 2px 0 0;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  border-width: 5px 0 5px 6px;
+}
+
+/* Blocks inside the calendar */
+.fc .fc-timegrid-event {
+  border-radius: 10px;
+  border: none;
+  overflow: hidden;
+  transition: box-shadow 0.15s, filter 0.15s;
+}
+.fc .fc-event-main {
+  padding: 0;
+}
+.fc .ev {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  height: 100%;
+  padding: 4px 6px 4px 8px;
+  line-height: 1.2;
+  overflow: hidden;
+}
+.fc .ev-time {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.fc .ev-title,
+.fc .ev-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fc .ev-title {
+  font-weight: 600;
+}
+.fc .ev-sub {
+  opacity: 0.85;
+  font-size: 11px;
+}
 .fc .free-block {
-  background: #e3f1e6;
-  border: 1px dashed #7fb48a;
+  background: var(--free-bg);
+  box-shadow: inset 3px 0 0 var(--free);
 }
 .fc .free-block .fc-event-main {
-  color: #2f6b3c;
+  color: var(--free);
+}
+.fc .free-block:hover {
+  filter: brightness(0.98);
 }
 .fc .booking-block {
   background: var(--color-accent);
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.15);
+  box-shadow: 0 4px 12px -6px rgb(0 0 0 / 0.35);
+  z-index: 3 !important;
 }
 .fc .booking-block .fc-event-main {
   color: #fff;
+}
+.fc .fc-event-dragging,
+.fc .fc-event-resizing {
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / 0.35) !important;
+}
+/* While dragging out new time: preview of the block being added */
+.fc .fc-event-mirror,
+.fc .fc-highlight {
+  background: color-mix(in oklab, var(--free) 22%, white);
+  opacity: 0.95;
+}
+.fc .ev-new {
+  color: var(--free);
+}
+/* Bigger, easier resize handle at the bottom of a block */
+.fc .fc-timegrid-event .fc-event-resizer-end {
+  height: 12px;
+  bottom: -2px;
+}
+.fc .free-block .fc-event-resizer-end::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 22px;
+  height: 3px;
+  margin-left: -11px;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--free) 45%, transparent);
+}
+
+/* Thin progress bar while a week is loading */
+.cal-wrap .cal-progress {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cal-wrap.is-loading .cal-progress {
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent) 0 0 / 40% 100% no-repeat;
+  animation: cal-progress 0.9s ease-in-out infinite;
+}
+.cal-wrap.is-loading .fc-timegrid-body {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+@keyframes cal-progress {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+
+/* Toast and sheets slide in softly */
+.toast {
+  animation: toast-in 0.18s ease-out;
+}
+.sheet-backdrop {
+  animation: fade-in 0.15s ease-out;
+}
+.sheet {
+  animation: sheet-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes sheet-in {
+  from { transform: translateY(24px); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast, .sheet, .sheet-backdrop, .cal-wrap.is-loading .cal-progress {
+    animation: none;
+  }
 }
 
 @layer components {
@@ -127,4 +281,18 @@ body {
 /* Pages with a bottom button: keep the footer links above it (outside @layer so it wins). */
 body:has(.bottom-bar) footer {
   padding-bottom: 10.5rem;
+}
+
+/* Admin calendar: time blocks fill the column; bookings sit on top of them at almost full width
+   (instead of being squeezed side by side), leaving a green strip on the left. */
+.fc .fc-timegrid-event-harness:has(> .free-block) {
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 !important;
+}
+.fc .fc-timegrid-event-harness:has(> .booking-block) {
+  left: 9px !important;
+  right: 1px !important;
+  margin: 0 !important;
+  z-index: 3 !important;
 }

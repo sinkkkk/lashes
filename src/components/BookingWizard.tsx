@@ -235,7 +235,7 @@ export function BookingWizard(props: {
             <p className="py-10 text-center text-muted">{t.noFreeTimes}</p>
           ) : (
             <>
-              <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+              <div className="no-scrollbar -mx-5 -mt-1 flex gap-2 overflow-x-auto px-5 pt-1 pb-2">
                 {days.map((key) => {
                   const has = daysWithSlots.has(key);
                   const active = key === day;

@@ -5,8 +5,8 @@ import { logoutAction } from "../actions";
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   return (
-    <div className="mx-auto max-w-6xl pb-24 md:pb-8">
-      <header className="flex items-center justify-between px-4 pt-4 pb-2">
+    <div className="mx-auto max-w-6xl pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-8">
+      <header className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),1rem)] pb-2">
         <span className="font-display text-xl font-semibold">Liisu Lashes · Admin</span>
         <div className="flex items-center gap-4 text-sm">
           <a href="/et" target="_blank" className="text-muted">Vaata lehte ↗</a>
