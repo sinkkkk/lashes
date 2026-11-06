@@ -36,7 +36,7 @@ export default async function BookPage({ params, searchParams }: PageProps<"/[la
       services={list}
       terms={lang === "et" ? settings.terms_et : settings.terms_en}
       businessName={site.name}
-      address={site.address}
+      area={site.area}
       initialServiceId={typeof service === "string" && list.some((s) => s.id === service) ? service : null}
     />
   );

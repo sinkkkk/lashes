@@ -31,7 +31,8 @@ export function BookingWizard(props: {
   terms: string;
   initialServiceId: string | null;
   businessName: string;
-  address: string;
+  /** Public area, e.g. "Tallinn, Nõmme" (the full address arrives only after booking) */
+  area: string;
 }) {
   const { lang, services, terms } = props;
   const t = dict[lang];
@@ -58,6 +59,7 @@ export function BookingWizard(props: {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [address, setAddress] = useState("");
 
   const service = services.find((s) => s.id === serviceId) ?? null;
 
@@ -141,7 +143,8 @@ export function BookingWizard(props: {
         setError(res.status === 400 ? t.invalid : t.error);
         return;
       }
-      const data = (await res.json()) as { token: string };
+      const data = (await res.json()) as { token: string; address?: string };
+      setAddress(data.address ?? "");
       try {
         localStorage.setItem("contact", JSON.stringify({ name: form.name, phone: form.phone, email: form.email }));
       } catch {}
@@ -308,6 +311,7 @@ export function BookingWizard(props: {
               {dayLabel(slot.day, { weekday: "long", day: "numeric", month: "long" })}, {slot.time} · {service.duration}
             </p>
             <p className="mt-1 font-semibold">{service.price}</p>
+            {props.area && <p className="mt-1 text-sm text-muted">📍 {props.area}</p>}
           </div>
 
           <Field label={t.name}>
@@ -358,6 +362,8 @@ export function BookingWizard(props: {
               {dayLabel(slot.day, { weekday: "long", day: "numeric", month: "long" })}, {slot.time}
             </p>
             <p className="mt-1 font-semibold">{service.price}</p>
+            {/* The full address is shown only now, after booking */}
+            {(address || props.area) && <p className="mt-2 text-sm">📍 {address || props.area}</p>}
           </div>
           <AddToCalendar
             token={token}
@@ -365,7 +371,7 @@ export function BookingWizard(props: {
             start={slot.iso}
             end={new Date(new Date(slot.iso).getTime() + service.durationMin * 60_000).toISOString()}
             details={`${window.location.origin}/${lang}/booking/${token}`}
-            location={props.address}
+            location={address || props.area}
             label={t.addToCalendar}
             googleLabel={t.addToGoogle}
             otherLabel={t.addToOtherCalendar}

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createBooking } from "@/lib/booking";
 import { getService } from "@/lib/db";
 import { onBookingCreated } from "@/lib/notify";
+import { site } from "@/lib/site";
 
 const Body = z.object({
   serviceId: z.string().uuid(),
@@ -41,5 +42,6 @@ export async function POST(req: Request) {
 
   // Emails, SMS and Google Calendar run after the answer is sent, so the customer isn't kept waiting.
   after(() => onBookingCreated(result.booking, service));
-  return Response.json({ token: result.booking.token });
+  // The full address is shared only with someone who has just booked (not shown on public pages).
+  return Response.json({ token: result.booking.token, address: site.address });
 }
