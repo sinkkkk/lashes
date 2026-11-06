@@ -9,8 +9,8 @@ before, they get a reminder, and after the visit an email asking for a review.
 **You (`/admin`):**
 - **Kalender** – a Google-Calendar-style week view. Drag on empty space to add free time
   (on a phone: hold your finger, then drag). Drag a block's edge to change it, tap it to delete.
-  Pink blocks are bookings; tap one to call, SMS or cancel. "Kopeeri" copies this week's free
-  time to next week.
+  Coloured blocks are bookings; tap one to call, SMS or cancel. Switch between day, 3-day, week
+  and month view, swipe sideways to change period, and tap "Täna" to jump to today.
 - **Broneeringud** – upcoming and past bookings.
 - **Teenused** – services with price, length, buffer (cleanup time) and photo.
 - **Arvustused** – approve reviews before they appear on the site.

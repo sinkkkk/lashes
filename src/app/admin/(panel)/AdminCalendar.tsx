@@ -3,6 +3,7 @@
 import etLocale from "@fullcalendar/core/locales/et";
 import type {
   DateSelectArg,
+  DatesSetArg,
   EventApi,
   EventChangeArg,
   EventClickArg,
@@ -10,11 +11,12 @@ import type {
   EventInput,
   EventSourceFuncArg,
 } from "@fullcalendar/core";
+import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import { cleanColor, readableText } from "@/lib/colors";
 import { cancelBookingByOwner, deleteBookingAction } from "../actions";
 
@@ -52,13 +54,32 @@ const freeEvent = (id: string, start: Date | string, end: Date | string): EventI
   extendedProps: { kind: "free" },
 });
 
+/** The view switch, like Google / Apple Calendar. */
+const VIEWS = [
+  { id: "timeGridDay", label: "Päev" },
+  { id: "timeGrid3", label: "3 päeva" },
+  { id: "timeGridWeek", label: "Nädal" },
+  { id: "dayGridMonth", label: "Kuu" },
+] as const;
+type ViewId = (typeof VIEWS)[number]["id"];
+const VIEW_KEY = "admin-calendar-view";
+
+function savedView(isMobile: boolean): ViewId {
+  try {
+    const v = localStorage.getItem(VIEW_KEY);
+    if (VIEWS.some((x) => x.id === v)) return v as ViewId;
+  } catch {}
+  return isMobile ? "timeGrid3" : "timeGridWeek";
+}
+
 export function AdminCalendar() {
   const cal = useRef<FullCalendar>(null);
   const router = useRouter();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState<BookingInfo | null>(null);
   const [freeSheet, setFreeSheet] = useState<EventApi | null>(null);
-  const [copySheet, setCopySheet] = useState<Date | null>(null);
+  const [view, setView] = useState<ViewId | null>(null);
+  const [title, setTitle] = useState("");
   const [toast, setToast] = useState<Toast | null>(null);
   const [loading, setLoading] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -204,30 +225,65 @@ export function AdminCalendar() {
     else if (p.kind === "free") setFreeSheet(c.event);
   };
 
-  function openCopy() {
-    const view = api()?.view;
-    if (!view) return;
-    // On the phone the view is 3 days, so always copy the whole Monday-Sunday week.
-    const d = new Date(view.currentStart);
-    setCopySheet(new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7)));
+  /** Switch view (and remember it on this device). */
+  function changeView(id: ViewId, date?: Date) {
+    api()?.changeView(id, date);
+    try {
+      localStorage.setItem(VIEW_KEY, id);
+    } catch {}
   }
 
-  async function copyWeek(monday: Date) {
-    setCopySheet(null);
-    const res = await fetch("/api/admin/copy-week", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ weekStart: monday.toISOString() }),
-    }).catch(() => null);
-    const data = res?.ok ? ((await res.json()) as { copied: number }) : null;
-    if (!data) return flash("Kopeerimine ebaõnnestus", { error: true });
-    flash(data.copied ? `Kopeeritud ${data.copied} aega järgmisele nädalale` : "Sellel nädalal pole aegu, mida kopeerida");
-    refetch();
-  }
+  const onDatesSet = (d: DatesSetArg) => {
+    setTitle(d.view.title);
+    setView(d.view.type as ViewId);
+  };
+
+  // Month view: tapping a day opens that day (like Google / Apple Calendar).
+  const onDateClick = (d: { date: Date; view: { type: string } }) => {
+    if (d.view.type === "dayGridMonth") changeView("timeGridDay", d.date);
+  };
+
+  // Swipe left / right to go to the next / previous period. Only quick, mostly sideways
+  // swipes count, so press-and-hold to add time and dragging blocks are not affected.
+  const swipe = useRef<{ x: number; y: number; t: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    swipe.current = e.touches.length === 1 ? { x: t.clientX, y: t.clientY, t: Date.now() } : null;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s0 = swipe.current;
+    swipe.current = null;
+    if (!s0 || document.querySelector(".fc-event-mirror, .fc-event-dragging, .fc-event-resizing")) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s0.x;
+    const dy = t.clientY - s0.y;
+    if (Date.now() - s0.t < 450 && Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) {
+      if (dx < 0) api()?.next();
+      else api()?.prev();
+    }
+  };
 
   /** How a block looks inside the calendar. */
   const renderEvent = (arg: EventContentArg) => {
     const kind = arg.event.extendedProps.kind;
+    if (arg.view.type === "dayGridMonth") {
+      // Month view: small chips, e.g. "10:00 Mari" or "10–18" for time for lashes.
+      if (kind === "booking") {
+        const b = arg.event.extendedProps.booking as BookingInfo;
+        const color = cleanColor(b.color);
+        return (
+          <div className="ev-month" style={color ? { color: readableText(color) } : undefined}>
+            <b>{arg.timeText.split(" ")[0]}</b> {b.customer_name}
+          </div>
+        );
+      }
+      const short = (d: Date | null) => (d ? time(d).replace(/:00$/, "") : "");
+      return (
+        <div className="ev-month">
+          {short(arg.event.start)}–{short(arg.event.end)}
+        </div>
+      );
+    }
     if (arg.isMirror && kind !== "free" && kind !== "booking") {
       return (
         <div className="ev ev-new">
@@ -256,8 +312,10 @@ export function AdminCalendar() {
 
   // FullCalendar reloads the week whenever it is handed a new loader function, so give it
   // stable wrappers that always call the latest handlers (no reload loops, no flicker).
-  const latest = useRef({ load, onSelect, onChange, onClick, renderEvent, openCopy });
-  latest.current = { load, onSelect, onChange, onClick, renderEvent, openCopy };
+  const latest = useRef({ load, onSelect, onChange, onClick, renderEvent, onDatesSet, onDateClick });
+  useLayoutEffect(() => {
+    latest.current = { load, onSelect, onChange, onClick, renderEvent, onDatesSet, onDateClick };
+  });
   const stable = useMemo(
     () => ({
       events: (info: EventSourceFuncArg) => latest.current.load(info),
@@ -266,39 +324,78 @@ export function AdminCalendar() {
       eventClick: (c: EventClickArg) => latest.current.onClick(c),
       eventContent: (a: EventContentArg) => latest.current.renderEvent(a),
       loading: (on: boolean) => setLoading(on),
+      datesSet: (d: DatesSetArg) => latest.current.onDatesSet(d),
+      dateClick: (d: { date: Date; view: { type: string } }) => latest.current.onDateClick(d),
     }),
     [],
   );
-  const layout = useMemo(
+  const views = useMemo(
     () => ({
-      views: { timeGrid3: { type: "timeGrid", duration: { days: 3 }, buttonText: "3 päeva" } },
-      headerToolbar: isMobile
-        ? { left: "prev,next", center: "title", right: "copy" }
-        : { left: "prev,next today", center: "title", right: "copy timeGridDay,timeGrid3,timeGridWeek" },
-      customButtons: { copy: { text: isMobile ? "Kopeeri ⇢" : "Kopeeri nädal järgmisse ⇢", click: () => latest.current.openCopy() } },
+      timeGrid3: { type: "timeGrid", duration: { days: 3 } },
+      dayGridMonth: { eventDisplay: "block", dayMaxEvents: 3, fixedWeekCount: false },
     }),
-    [isMobile],
+    [],
   );
+  const initialView = useMemo(() => (isMobile === null ? null : savedView(isMobile)), [isMobile]);
+  const isMonth = view === "dayGridMonth";
 
   if (isMobile === null) return null;
 
   return (
     <div>
       <p className="mb-3 text-sm text-muted">
-        {isMobile ? "Hoia sõrme tühjal kohal ja lohista" : "Lohista tühjal alal"}, et lisada{" "}
-        <b className="text-[#3f7a4c]">{FREE_LABEL.toLowerCase()}</b>. Lohista servast pikkuse muutmiseks, puuduta muutmiseks või
-        kustutamiseks. <b className="text-accent">Värvilised</b> on broneeringud.
+        {isMonth ? (
+          <>Puuduta päeva, et see avada ja aegu lisada.</>
+        ) : (
+          <>
+            {isMobile ? "Hoia sõrme tühjal kohal ja lohista" : "Lohista tühjal alal"}, et lisada{" "}
+            <b className="text-[#3f7a4c]">{FREE_LABEL.toLowerCase()}</b>. Lohista servast pikkuse muutmiseks, puuduta muutmiseks või
+            kustutamiseks. <b className="text-accent">Värvilised</b> on broneeringud.
+          </>
+        )}
       </p>
-      <div className={`cal-wrap relative rounded-2xl bg-white p-2 ring-1 ring-line md:p-4 ${loading ? "is-loading" : ""}`}>
+      <div
+        className={`cal-wrap relative rounded-2xl bg-white p-2 ring-1 ring-line md:p-4 ${loading ? "is-loading" : ""}`}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <div className="cal-progress" aria-hidden />
+        {/* Toolbar like Google / Apple Calendar: arrows, title, Today, and a view switch */}
+        <div className="mb-2 flex items-center gap-1.5">
+          <button type="button" onClick={() => api()?.prev()} className="cal-nav" aria-label="Eelmine">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button type="button" onClick={() => api()?.next()} className="cal-nav" aria-label="Järgmine">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
+          <h2 className="min-w-0 flex-1 truncate px-1 text-base font-semibold first-letter:uppercase md:text-lg">{title}</h2>
+          <button type="button" onClick={() => api()?.today()} className="rounded-full px-3.5 py-2 text-sm font-semibold ring-1 ring-line active:scale-95">
+            Täna
+          </button>
+        </div>
+        <div role="tablist" aria-label="Vaade" className="mb-3 grid grid-cols-4 gap-1 rounded-full bg-sand p-1">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              role="tab"
+              type="button"
+              aria-selected={view === v.id}
+              onClick={() => changeView(v.id)}
+              className={`rounded-full py-2 text-sm font-semibold transition ${view === v.id ? "bg-white text-ink shadow-sm" : "text-muted active:bg-white/60"}`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
         <FullCalendar
           ref={cal}
-          plugins={[timeGridPlugin, interactionPlugin]}
+          plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
           locale={etLocale}
-          initialView={isMobile ? "timeGrid3" : "timeGridWeek"}
-          views={layout.views}
-          headerToolbar={layout.headerToolbar}
-          customButtons={layout.customButtons}
+          initialView={initialView ?? "timeGridWeek"}
+          views={views}
+          headerToolbar={false}
+          datesSet={stable.datesSet}
+          dateClick={stable.dateClick}
           firstDay={1}
           allDaySlot={false}
           slotMinTime="07:00:00"
@@ -310,12 +407,12 @@ export function AdminCalendar() {
           eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
           height="auto"
           nowIndicator
-          selectable
+          selectable={!isMonth}
           selectMirror
           longPressDelay={200}
           selectLongPressDelay={200}
           eventLongPressDelay={200}
-          editable
+          editable={!isMonth}
           eventOverlap
           selectOverlap
           events={stable.events}
@@ -367,24 +464,6 @@ export function AdminCalendar() {
               className="rounded-full bg-ink py-3 font-semibold text-white"
             >
               Kustuta
-            </button>
-          </div>
-        </Sheet>
-      )}
-
-      {copySheet && (
-        <Sheet onClose={() => setCopySheet(null)}>
-          <h2 className="font-display text-2xl font-semibold">Kopeeri nädal</h2>
-          <p className="mt-2 text-sm text-muted">
-            Kõik ajad ripsmeteks nädalast, mis algab <b>{copySheet.toLocaleDateString("et-EE", { day: "numeric", month: "long" })}</b>, kopeeritakse samadele
-            kellaaegadele järgmisel nädalal. Olemasolevad ajad jäävad alles.
-          </p>
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <button onClick={() => setCopySheet(null)} className="rounded-full py-3 font-semibold ring-1 ring-line">
-              Sulge
-            </button>
-            <button onClick={() => copyWeek(copySheet)} className="rounded-full bg-ink py-3 font-semibold text-white">
-              Kopeeri
             </button>
           </div>
         </Sheet>

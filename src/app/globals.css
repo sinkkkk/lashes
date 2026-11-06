@@ -360,3 +360,57 @@ body:has([data-dark-page]) .lash-icon {
 @media (prefers-reduced-motion: reduce) {
   .service-row.is-wobbling { animation: none; }
 }
+
+/* Admin calendar toolbar and month view */
+.cal-nav {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  transition: transform 0.1s, background 0.15s;
+}
+.cal-nav:active {
+  transform: scale(0.92);
+  background: var(--color-sand);
+}
+.fc .fc-daygrid-day-number {
+  font-size: 12px;
+  padding: 4px 6px;
+  color: var(--color-ink);
+}
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background: #e5322d;
+  color: #fff;
+  border-radius: 999px;
+  min-width: 1.6em;
+  text-align: center;
+}
+.fc .fc-daygrid-day {
+  cursor: pointer;
+}
+.fc .fc-daygrid-event {
+  border-radius: 6px;
+  border: none;
+  margin: 1px 2px 0 !important;
+}
+.fc .ev-month {
+  overflow: hidden;
+  padding: 1px 4px;
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fc .fc-daygrid-event.free-block .ev-month {
+  color: var(--free);
+  font-weight: 600;
+}
+.fc .fc-daygrid-event.booking-block .ev-month {
+  color: #fff;
+}
+.fc .fc-daygrid-more-link {
+  font-size: 10px;
+  color: var(--color-muted);
+}
