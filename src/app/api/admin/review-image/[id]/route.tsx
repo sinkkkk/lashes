@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ImageResponse } from "next/og";
 import { isAdmin } from "@/lib/auth";
 import { db, type Review } from "@/lib/db";
@@ -11,15 +12,29 @@ import { getTheme } from "@/lib/theme";
  * A review as an image (PNG) for Instagram / TikTok, made in admin → Reviews.
  * ?format=story|post|square & theme=<id>. Admin only.
  */
-const FONT_DIR = join(process.cwd(), "src", "assets", "fonts");
+// Fonts live in public/fonts. On Cloudflare they are read from the site's static files
+// (there is no file system); everywhere else straight from disk.
+const FONT_DIR = join(process.cwd(), "public", "fonts");
 // Each font is split in two files: basic Latin, and "Ext" with Estonian letters (õ ä ö ü š ž).
 // They need different names (the image renderer keeps one file per name), so every
 // fontFamily below lists the "Ext" file as a fallback.
-type Font = { name: string; data: Buffer; weight: 400 | 500 | 600; style: "normal" | "italic" };
+type Font = { name: string; data: ArrayBuffer | Buffer; weight: 400 | 500 | 600; style: "normal" | "italic" };
 let fontsPromise: Promise<Font[]> | null = null;
-function loadFonts() {
+
+async function readFont(file: string, origin: string): Promise<ArrayBuffer | Buffer> {
+  if (typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers") {
+    const { env } = getCloudflareContext();
+    const assets = (env as unknown as { ASSETS: { fetch: (r: Request) => Promise<Response> } }).ASSETS;
+    const res = await assets.fetch(new Request(`${origin}/fonts/${file}`));
+    if (!res.ok) throw new Error(`font ${file}: ${res.status}`);
+    return res.arrayBuffer();
+  }
+  return readFile(join(FONT_DIR, file));
+}
+
+function loadFonts(origin: string) {
   const f = (file: string, name: string, weight: Font["weight"], style: Font["style"]) =>
-    readFile(join(FONT_DIR, file)).then((data) => ({ name, data, weight, style }));
+    readFont(file, origin).then((data) => ({ name, data, weight, style }));
   fontsPromise ??= Promise.all([
     f("cormorant-garamond-latin-600-normal.woff", "Cormorant", 600, "normal"),
     f("cormorant-garamond-latin-ext-600-normal.woff", "CormorantExt", 600, "normal"),
@@ -45,7 +60,7 @@ export async function GET(req: Request, ctx: RouteContext<"/api/admin/review-ima
   const q = new URL(req.url).searchParams;
   const format = reviewFormat(q.get("format"));
   const { w, h, scale } = REVIEW_FORMATS[format];
-  const [fonts, look] = await Promise.all([loadFonts(), getTheme()]);
+  const [fonts, look] = await Promise.all([loadFonts(new URL(req.url).origin), getTheme()]);
   const t = reviewTheme(q.get("theme"), look.accent);
   const s = (n: number) => Math.round(n * scale);
   const text = review.text.trim();

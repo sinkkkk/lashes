@@ -7,4 +7,4 @@
 
 [functions]
   # Fonts read at run time by the review image generator (src/app/api/admin/review-image)
-  included_files = ["src/assets/fonts/**"]
+  included_files = ["public/fonts/**"]

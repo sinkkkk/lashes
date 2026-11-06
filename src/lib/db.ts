@@ -1,3 +1,4 @@
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import postgres from "postgres";
 
 type Sql = postgres.Sql;
@@ -5,12 +6,17 @@ type Sql = postgres.Sql;
 // One shared connection pool, also across hot reloads in development.
 const g = globalThis as unknown as { __sql?: Sql };
 
-function connect(): Sql {
+/** True when running on Cloudflare Workers. */
+const onCloudflare = () => typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
+
+function connect(cloudflare = false): Sql {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set (see .env.example)");
   const local = /localhost|127\.0\.0\.1|host=\/tmp/.test(url);
   return postgres(url, {
-    max: 5,
+    max: cloudflare ? 1 : 5,
+    // On Cloudflare every page view has its own connection, so skip the extra type lookup.
+    fetch_types: !cloudflare,
     prepare: false, // works with Supabase's connection pooler
     ssl: local ? false : "require",
     idle_timeout: 20,
@@ -20,8 +26,23 @@ function connect(): Sql {
   });
 }
 
+/**
+ * Cloudflare Workers can't share a database connection between visitors' requests, so there
+ * each request gets its own connection (kept for that request only).
+ */
+const perRequest = new WeakMap<object, Sql>();
+
 /** Lazily created so that `next build` works without a database. */
 export function db(): Sql {
+  if (onCloudflare()) {
+    const { ctx } = getCloudflareContext();
+    let sql = perRequest.get(ctx);
+    if (!sql) {
+      sql = connect(true);
+      perRequest.set(ctx, sql);
+    }
+    return sql;
+  }
   if (!g.__sql) g.__sql = connect();
   return g.__sql;
 }

@@ -44,23 +44,25 @@ FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
    `EMAIL_FROM=Lashes by Hille Liis <broneering@yourdomain.ee>`.
    (Until the domain is verified, Resend only lets you send to your own email.)
 
-### 3. Hosting: Netlify (free plan, allowed for business use)
-1. Put this code on GitHub (already done if you're reading this there).
-2. At [netlify.com](https://www.netlify.com), sign up with GitHub → **Add new project → Import an existing
-   project** → GitHub → pick the repository. The build settings come from [`netlify.toml`](netlify.toml).
-3. **Project configuration → Environment variables**: add the values from [`.env.example`](.env.example)
-   (at least the "Required" ones, plus `RESEND_API_KEY`, `EMAIL_FROM`, a random `CRON_SECRET`, and
-   `NTFY_TOPIC` if you use phone notifications).
-4. **Project configuration → Build & deploy → Functions region**: choose **EU (Ireland, eu-west-1)** if
-   offered, next to the Supabase database, so pages stay fast. Then **Deploys → Trigger deploy**.
-5. **Domain management** → add your domain (e.g. `hilleliis.ee`) and follow the DNS instructions; set
-   `NEXT_PUBLIC_SITE_URL` to it. HTTPS is set up automatically.
+### 3. Hosting: Cloudflare Workers (Workers Paid, $5/month)
+The site runs on Cloudflare Workers through the [OpenNext adapter](https://opennext.js.org/cloudflare).
+The settings are in [`wrangler.jsonc`](wrangler.jsonc).
+1. In Cloudflare, buy **Workers Paid** (the free plan's 10 ms CPU limit is too small for this app).
+2. **Workers & Pages → Create → Import a repository** → GitHub → pick this repository.
+   Build command `npx opennextjs-cloudflare build`, deploy command `npx opennextjs-cloudflare deploy`.
+3. **Settings → Variables and Secrets**: add the values from [`.env.example`](.env.example) (at least the
+   "Required" ones, plus `RESEND_API_KEY`, a random `CRON_SECRET`, and `NTFY_TOPIC` if you use phone
+   notifications). Store the passwords and keys as **Secret**.
+4. **Settings → Domains & Routes → Add → Custom domain**: add `hilleliis.ee` and `www.hilleliis.ee`
+   (the domain's DNS must be on Cloudflare). HTTPS is set up automatically.
 
-The daily job (reminders + review requests) is the scheduled function
-[`netlify/functions/daily.mjs`](netlify/functions/daily.mjs); it runs at 16:00 UTC (18:00/19:00 in Tallinn).
+The daily job (reminders + review requests) is a Cron Trigger in `wrangler.jsonc` that calls `/api/cron`
+through [`cloudflare-worker.js`](cloudflare-worker.js). It runs at 16:00 UTC (18:00/19:00 in Tallinn).
 
-*(The project also still runs on Vercel: [`vercel.json`](vercel.json) holds its daily job and Dublin region.
-Vercel's free Hobby plan is for non-commercial use only, which is why Netlify is the recommended host.)*
+To try the Cloudflare build on your computer: put the variables in `.dev.vars`, then run `npm run cf:preview`.
+
+*(The project also still builds on Netlify ([`netlify.toml`](netlify.toml)) and Vercel ([`vercel.json`](vercel.json)).
+Only one host should be live at a time, or the daily emails are sent twice.)*
 
 ### 4. Apple Calendar (built in, nothing to set up)
 On your iPhone, open `/admin` → **Seaded** → **Lisa Apple kalendrisse** → **Subscribe**.
@@ -88,7 +90,7 @@ You then get a push for every new booking and customer cancellation; tapping it 
 
 ### 6. SMS (phase 2, optional)
 Create an account at [messente.com](https://messente.com), add `MESSENTE_USER`,
-`MESSENTE_PASSWORD` and (for your own alerts) `NEXT_PUBLIC_PHONE`. SMS switches on
+`MESSENTE_PASSWORD` and (for your own alerts) `PHONE`. SMS switches on
 automatically: customers get a booking SMS and a reminder, and you get an SMS for each booking.
 
 ### Photos

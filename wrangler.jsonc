@@ -1,0 +1,19 @@
+{
+  // Cloudflare Workers hosting. Passwords and keys are set in the Cloudflare dashboard
+  // (Workers → lashes → Settings → Variables and Secrets), not here.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lashes",
+  "main": "cloudflare-worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Run the site close to the database (Supabase, Ireland) instead of next to each visitor:
+  // a page asks the database several questions, so this keeps pages fast.
+  "placement": { "mode": "smart" },
+  // Daily reminders and review requests at 16:00 UTC (18:00 / 19:00 in Tallinn)
+  "triggers": { "crons": ["0 16 * * *"] },
+  "observability": { "enabled": true }
+}

@@ -44,3 +44,10 @@ next-env.d.ts
 
 # Netlify local build output
 .netlify/
+
+# Cloudflare (OpenNext) build output
+.open-next/
+.wrangler/
+
+# Local Cloudflare secrets
+.dev.vars
