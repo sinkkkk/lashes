@@ -17,7 +17,7 @@ export function PushTest() {
       </button>
       {result !== null && !pending && (
         <p role="status" className={`mt-3 rounded-xl p-3 text-sm ${result ? "bg-emerald-50 text-emerald-800" : "bg-accent/10 text-accent"}`}>
-          {result ? "Saadetud! Teade peaks kohe telefoni jõudma." : "Saatmine ebaõnnestus. Kontrolli NTFY_TOPIC väärtust Vercelis."}
+          {result ? "Saadetud! Teade peaks kohe telefoni jõudma." : "Saatmine ebaõnnestus. Kontrolli NTFY_TOPIC väärtust Cloudflare'is."}
         </p>
       )}
     </>

@@ -68,7 +68,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/admin/s
           </>
         ) : (
           <p className="mt-3 text-sm text-muted">
-            Välja lülitatud. Lisa Vercelis seade <code>NTFY_TOPIC</code> ja tee Redeploy (vt README).
+            Välja lülitatud. Lisa Cloudflare&apos;is (Workers → lashes → Settings → Variables and Secrets) seade <code>NTFY_TOPIC</code> (vt README).
           </p>
         )}
       </section>

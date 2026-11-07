@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // Not bundled by Next, so the Cloudflare build picks the driver's own Workers version
   // (Cloudflare sockets with TLS) instead of the Node.js one.
   serverExternalPackages: ["postgres"],
-  // Fonts read at run time by the review image route; make sure Vercel ships them.
+  // Fonts read at run time by the review image route; make sure the build includes them.
   outputFileTracingIncludes: { "/api/admin/review-image/**": ["./public/fonts/**"] },
   async redirects() {
     return [

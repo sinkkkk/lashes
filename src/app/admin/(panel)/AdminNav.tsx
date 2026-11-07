@@ -19,7 +19,7 @@ export function AdminNav() {
   const [tapped, setTapped] = useState<{ href: string; from: string } | null>(null);
   const current = tapped && tapped.from === path ? tapped.href : null;
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-white/95 px-1 pb-[calc(max(env(safe-area-inset-bottom),0.5rem)+var(--host-badge,0px))] backdrop-blur md:static md:mx-4 md:mb-4 md:gap-1 md:rounded-full md:border md:p-1">
+    <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-white/95 px-1 pb-[max(env(safe-area-inset-bottom),0.5rem)] backdrop-blur md:static md:mx-4 md:mb-4 md:gap-1 md:rounded-full md:border md:p-1">
       {items.map((i) => {
         const active = current ? current === i.href : matches(i.href, path);
         return (

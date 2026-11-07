@@ -15,7 +15,6 @@ const eslintConfig = defineConfig([
     // Hosting build output:
     ".open-next/**",
     ".wrangler/**",
-    ".netlify/**",
   ]),
 ]);
 

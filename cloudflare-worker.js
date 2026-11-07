@@ -5,7 +5,7 @@ import handler from "./.open-next/worker.js";
 const worker = {
   fetch: handler.fetch,
 
-  /** Cron trigger (see wrangler.jsonc): calls the site's own /api/cron, like Vercel Cron did. */
+  /** Cron trigger (see wrangler.jsonc): calls the site's own /api/cron. */
   async scheduled(_event, env, ctx) {
     const site = (env.SITE_URL || "https://hilleliis.ee").replace(/\/$/, "");
     const request = new Request(`${site}/api/cron`, { headers: { Authorization: `Bearer ${env.CRON_SECRET}` } });

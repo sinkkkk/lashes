@@ -22,11 +22,11 @@ The database itself makes double bookings impossible, even if two people press
 "Confirm" at the same moment.
 
 Tech: Next.js 16, Tailwind, Postgres (Supabase), Resend email, Apple/iCal calendar feed (optional Google Calendar API),
-FullCalendar, optional Messente SMS. Runs on Vercel's free plan.
+FullCalendar, optional Messente SMS. Runs on Cloudflare Workers.
 
 ---
 
-## Going live (about 1 hour, all free tiers)
+## Going live (about 1 hour)
 
 ### 1. Database: Supabase
 1. Create an account at [supabase.com](https://supabase.com) → **New project** (region: Frankfurt / eu-central-1).
@@ -66,9 +66,6 @@ through [`cloudflare-worker.js`](cloudflare-worker.js). It runs at 16:00 UTC (18
 To try the Cloudflare build on your computer: put the variables in `.dev.vars`, point `localConnectionString`
 in `wrangler.jsonc` at a local database, then run `npm run cf:preview`.
 
-*(The project also still builds on Netlify ([`netlify.toml`](netlify.toml)) and Vercel ([`vercel.json`](vercel.json)).
-Only one host should be live at a time, or the daily emails are sent twice.)*
-
 ### 4. Apple Calendar (built in, nothing to set up)
 On your iPhone, open `/admin` → **Seaded** → **Lisa Apple kalendrisse** → **Subscribe**.
 All bookings appear in your calendar and update by themselves; cancelled ones disappear.
@@ -82,13 +79,13 @@ so the new-booking email is your instant alert.
 [console.cloud.google.com](https://console.cloud.google.com) → enable **Google Calendar API** →
 **OAuth consent screen** (External, add yourself, **Publish app**) → **Credentials → OAuth client ID →
 Web application** with redirect URI `https://YOUR-DOMAIN/api/google/callback`. Add
-`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel, redeploy, then connect it in `/admin` → **Seaded**.
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Cloudflare (Workers → lashes → Settings → Variables and Secrets), then connect it in `/admin` → **Seaded**.
 
 ### 5. Instant phone notifications (free)
 1. Install **ntfy** on your phone (App Store / Google Play).
 2. Tap **+**, enter a secret topic name such as `hilleliis-a1b2c3d4e5f6` (hard to guess: anyone who
    knows it can read the notifications), and subscribe.
-3. In Vercel add `NTFY_TOPIC` with the same name, then **Redeploy**.
+3. In Cloudflare (Workers → lashes → Settings → Variables and Secrets) add `NTFY_TOPIC` with the same name.
 4. `/admin` → **Seaded** → **Telefoni teavitused** → **Saada testteade**.
 
 You then get a push for every new booking and customer cancellation; tapping it opens the admin.

@@ -392,7 +392,7 @@ export function BookingWizard(props: {
 
       {showTerms && (
         <div className="fixed inset-0 z-30 flex items-end bg-black/40" onClick={() => setShowTerms(false)}>
-          <div className="mx-auto max-h-[80dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-cream p-6 pb-[calc(max(1.5rem,env(safe-area-inset-bottom))+var(--host-badge,0px))]" onClick={(e) => e.stopPropagation()}>
+          <div className="mx-auto max-h-[80dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-cream p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-3 font-display text-2xl font-semibold">{t.terms}</h2>
             <p className="text-[15px] leading-relaxed whitespace-pre-line">{terms}</p>
             <h3 className="mt-5 mb-2 font-semibold">{t.dataTitle}</h3>
